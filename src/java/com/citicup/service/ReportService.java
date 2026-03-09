@@ -55,5 +55,9 @@ public class ReportService {
 
         return saved.getId();
     }
+    public RiskReport getLatestReport() {
+    return reportRepo.findTopByOrderByPredictionRunIdDesc()
+            .orElseThrow(() -> new RuntimeException("no reports"));
+}
 }{
 }
