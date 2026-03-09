@@ -1,0 +1,17 @@
+:root {
+  --color-bg: #070b1a;
+  --color-bg-elevated: #0e1430;
+  --color-bg-card: #101a3a;
+  --color-border: rgba(136, 168, 255, 0.24);
+  --color-text-primary: #eff4ff;
+  --color-text-secondary: #a9b5d6;
+  --color-text-muted: #7f8bb0;
+  --color-accent: #4f82ff;
+  --color-accent-strong: #6a5eff;
+  --color-positive: #1ec98f;
+  --color-negative: #ff5a85;
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.42);
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+}
