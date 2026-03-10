@@ -1,13 +1,14 @@
 package com.citicup.service;
 
+import com.citicup.dto.oilprice.OilPrice;
 import com.citicup.dto.oilprice.OilPriceApiResponse;
+import com.citicup.dto.oilprice.OilPriceData;
 import com.citicup.entity.OilPriceHistory;
-import com.citicup.respository.OilPriceHistoryRepo;
-
+import com.citicup.repository.OilPriceHistoryRepo;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

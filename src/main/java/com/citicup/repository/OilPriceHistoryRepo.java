@@ -1,4 +1,4 @@
-package com.citicup.respository;
+package com.citicup.repository;
 
 import com.citicup.entity.OilPriceHistory;
 import org.springframework.data.jpa.repository.JpaRepository;

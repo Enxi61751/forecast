@@ -1,6 +1,7 @@
 package com.citicup.controller;
 
 import com.citicup.dto.oilprice.OilPriceApiResponse;
+import com.citicup.entity.OilPriceHistory;
 import com.citicup.service.OilPriceService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +19,11 @@ public class OilPriceController {
 
     @GetMapping("/latest")
     public OilPriceApiResponse getLatestOilPrice() {
-        return oilPriceService.getLatestPrices();
+        return oilPriceService.getLatestOilPrice();
     }
 
     @GetMapping("/history")
-    public List<OilPriceApiResponse> getHistory(
+    public List<OilPriceHistory> getHistory(
         @RequestParam String start,
         @RequestParam String end) {
 

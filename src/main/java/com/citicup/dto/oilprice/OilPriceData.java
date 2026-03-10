@@ -1,6 +1,5 @@
-package com.citicup.dto.oil;
+package com.citicup.dto.oilprice;
 
-import com.citicup.dto.oil.OilPrice;
 
 public class OilPriceData {
 

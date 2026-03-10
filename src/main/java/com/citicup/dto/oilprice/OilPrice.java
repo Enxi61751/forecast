@@ -1,4 +1,4 @@
-package com.citicup.dto.oil;
+package com.citicup.dto.oilprice;
 
 public class OilPrice {
 

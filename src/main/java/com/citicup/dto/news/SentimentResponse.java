@@ -1,9 +1,10 @@
 package com.citicup.dto.news;
 
 import lombok.Data;
+import lombok.Builder;
 import java.util.List;
 
-@Data
+@Data@Builder
 public class SentimentResponse {
     private double sentiment;      // 分数
     private double confidence;
