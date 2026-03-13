@@ -1,4 +1,4 @@
-package java.com.citicup.service;
+package com.citicup.service;
 
 public class DataService {
 }

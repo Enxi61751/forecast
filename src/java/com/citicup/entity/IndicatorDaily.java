@@ -1,4 +1,4 @@
-package java.com.citicup.entity;
+package com.citicup.entity;
 
 public class IndicatorDaily {
 }

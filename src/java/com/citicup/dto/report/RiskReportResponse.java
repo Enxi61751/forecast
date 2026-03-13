@@ -1,4 +1,4 @@
-package java.com.citicup.dto.report;
+package com.citicup.dto.report;
 
 public class RiskReportResponse {
 }

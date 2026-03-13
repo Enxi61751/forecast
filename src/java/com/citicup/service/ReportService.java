@@ -1,6 +1,4 @@
-package java.com.citicup.service;
-
-public class ReportService package com.citicup.service;
+package com.citicup.service;
 
 import com.citicup.dto.agent.AgentSimRequest;
 import com.citicup.entity.PredictionRun;
@@ -55,5 +53,4 @@ public class ReportService {
 
         return saved.getId();
     }
-}{
 }
