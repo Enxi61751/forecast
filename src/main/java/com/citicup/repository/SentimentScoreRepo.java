@@ -1,6 +1,6 @@
 package com.citicup.repository;
 
-import com.citicup.entity.NewsArticle;
+import com.citicup.entity.SentimentScore;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NewsArticleRepo extends JpaRepository<NewsArticle, Long> {}
+public interface SentimentScoreRepo extends JpaRepository<SentimentScore, Long> {}

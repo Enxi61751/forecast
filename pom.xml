@@ -82,10 +82,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
             <!-- Maven 编译器插件 -->
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -95,15 +91,22 @@
                    <source>17</source>
                    <target>17</target>
                    <release>17</release>
+                   <annotationProcessorPaths>
+                       <path>
+                           <groupId>org.projectlombok</groupId>
+                           <artifactId>lombok</artifactId>
+                           <version>1.18.34</version>
+                       </path>
+                   </annotationProcessorPaths>
                </configuration>
            </plugin>
 
-        <!-- Spring Boot 插件 -->
-           <plugin>
-              <groupId>org.springframework.boot</groupId>
-              <artifactId>spring-boot-maven-plugin</artifactId>
-              <version>4.1.0-M2</version>
-           </plugin>
+            <!-- Spring Boot 插件 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
         </plugins>
     </build>
 </project>

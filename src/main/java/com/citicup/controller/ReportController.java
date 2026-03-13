@@ -24,7 +24,7 @@ public class ReportController {
     public ApiResponse<Long> generate(@PathVariable Long predictionRunId) {
         return ApiResponse.ok(reportService.generateReport(predictionRunId));
     }
-    @GetMapping("/report/download")
+    @GetMapping("/download")
     public ResponseEntity<byte[]> downloadReport() {
 
         try {

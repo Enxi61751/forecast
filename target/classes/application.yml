@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: url: jdbc:mysql://123.206.104.63:3306/citicup?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
-    username: citicup_user
-    password: citicup123456
+    url: YOUR_DB_URL
+    username: YOUR_DB_USERNAME
+    password: YOUR_DB_PASSWORD
   jpa:
     hibernate:
       ddl-auto: none
@@ -28,4 +28,4 @@ app:
   oilprice:
     api:
       url: https://api.oilpriceapi.com/v1/prices/latest
-      token: f8ce9a563960cc9e3bb70ae4659264a1e33d3453861454863010e837f09f9deb
+      token: YOUR_OIL_API_TOKEN

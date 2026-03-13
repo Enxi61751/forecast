@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -78,7 +79,7 @@ public class OilPriceService {
         entity.setCurrency(priceData.getCurrency());
         entity.setUnit(priceData.getUnit());
         entity.setChangePercent(priceData.getChange());
-        entity.setTimestamp(LocalDateTime.parse(priceData.getTimestamp()));
+        entity.setTimestamp(OffsetDateTime.parse(priceData.getTimestamp()).toLocalDateTime());
 
         oilPriceHistoryRepo.save(entity);
     }
