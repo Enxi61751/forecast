@@ -30,17 +30,34 @@ public class ReportService {
         simReq.setForecastJson(run.getForecastJson());
         String materialsJson = modelClient.simulateAgents(simReq);
 
-        // 这里先用模板拼接；后续你们可接 LLM 来写更自然的报告
-        String reportText = """
-                【油价风险快报】
-                标的：%s
-                期限：%s
-                运行时间：%s
+        String prompt = """
+                你是一位专业的大宗商品风险分析师，请根据以下数据，用中文撰写一份面向银行风控团队的油价风险快报。
 
-                1) 预测结论：见系统预测曲线/区间
-                2) 极端情景：见极端分类模块输出
-                3) 解释材料（多智能体）：见附录材料
-                """.formatted(run.getTarget(), run.getHorizon(), run.getRunAt());
+                【预测基本信息】
+                - 标的：%s
+                - 期限：%s
+                - 分析时间：%s
+
+                【量化预测结果】
+                %s
+
+                【极端情景分类】
+                %s
+
+                【多智能体分析材料】
+                %s
+
+                请输出一份结构清晰、语言专业的风险快报，包含：预测结论、风险提示、极端情景说明、主要驱动因素。
+                """.formatted(
+                        run.getTarget(),
+                        run.getHorizon(),
+                        run.getRunAt(),
+                        run.getForecastJson(),
+                        run.getExtremeClsJson(),
+                        materialsJson
+                );
+
+        String reportText = modelClient.callLlm(prompt);
 
         RiskReport saved = reportRepo.save(
                 RiskReport.builder()

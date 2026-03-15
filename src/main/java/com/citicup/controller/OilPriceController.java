@@ -1,5 +1,6 @@
 package com.citicup.controller;
 
+import com.citicup.common.ApiResponse;
 import com.citicup.dto.oilprice.OilPriceApiResponse;
 import com.citicup.entity.OilPriceHistory;
 import com.citicup.service.OilPriceService;
@@ -18,16 +19,15 @@ public class OilPriceController {
     }
 
     @GetMapping("/latest")
-    public OilPriceApiResponse getLatestOilPrice() {
-        return oilPriceService.getLatestOilPrice();
+    public ApiResponse<OilPriceApiResponse> getLatestOilPrice() {
+        return ApiResponse.ok(oilPriceService.getLatestOilPrice());
     }
 
     @GetMapping("/history")
-    public List<OilPriceHistory> getHistory(
-        @RequestParam String start,
-        @RequestParam String end) {
-
-    return oilPriceService.getHistoryPrices(start, end);
-}
+    public ApiResponse<List<OilPriceHistory>> getHistory(
+            @RequestParam String start,
+            @RequestParam String end) {
+        return ApiResponse.ok(oilPriceService.getHistoryPrices(start, end));
+    }
 
 }

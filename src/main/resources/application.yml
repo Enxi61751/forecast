@@ -29,3 +29,6 @@ app:
     api:
       url: https://api.oilpriceapi.com/v1/prices/latest
       token: YOUR_OIL_API_TOKEN
+  llm:
+    api-key: YOUR_LLM_API_KEY
+    url: https://api.deepseek.com/chat/completions
