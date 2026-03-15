@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: "jdbc:mysql://123.206.104.63:3306/citicup?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8"
+    username: citicup_user
+    password: citicup123456
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+app:
+  oilprice:
+    api:
+      token: 1ae8e738d6b030253e14a9723c0e6dff3b996631e2b1858e3def3db61b2d4aaf
+  llm:
+    api-key: sk-10a2d153d3474aa5acca7e2e5ae01f78

@@ -1,0 +1,10 @@
+com/citicup/controller/OilPriceControllerTest.class
+com/citicup/controller/ReportControllerTest.class
+com/citicup/service/client/ModelServiceClientLlmTest.class
+com/citicup/controller/HealthControllerTest.class
+com/citicup/service/ReportServiceTest.class
+com/citicup/service/OilPriceServiceTest.class
+com/citicup/controller/PredictControllerTest.class
+com/citicup/service/NewsServiceTest.class
+com/citicup/service/PredictServiceTest.class
+com/citicup/controller/NewsControllerTest.class
