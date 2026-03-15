@@ -1,4 +1,3 @@
-# app/schemas.py
 from __future__ import annotations
 
 from datetime import datetime
@@ -24,14 +23,12 @@ class CEEMDANConfig(BaseModel):
     trials: int = 100
     noise_width: float = 0.2
     max_imfs: int = 8
+    seed: Optional[int] = 42
 
 
 class SeriesPayload(BaseModel):
     price: list[TimePoint]
-
-    # 用 default_factory 生成新对象，避免共享可变默认值
     indicators: dict[str, list[TimePoint]] = Field(default_factory=dict)
-
     sentiment_index: Optional[list[TimePoint]] = None
 
 
@@ -40,11 +37,7 @@ class PredictRequest(BaseModel):
     horizon: str
     asOf: Optional[datetime] = None
     series: SeriesPayload
-
-    # 同理：每次实例化都有独立 list
     events: list[Event] = Field(default_factory=list)
-
-    # 子模型默认值：用 default_factory 更安全（避免共享实例）
     ceemdan: CEEMDANConfig = Field(default_factory=CEEMDANConfig)
 
 
@@ -65,6 +58,8 @@ class Explain(BaseModel):
     lgbm_top_features: Optional[list[dict[str, Any]]] = None
     imf_contrib: Optional[list[dict[str, Any]]] = None
     alpha: Optional[float] = None
+    ceemdan: Optional[dict[str, Any]] = None
+    model_outputs: Optional[dict[str, Any]] = None
 
 
 class PredictResponse(BaseModel):
