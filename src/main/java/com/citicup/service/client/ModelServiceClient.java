@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,9 +37,16 @@ public class ModelServiceClient {
     }
 
     public PredictResponse predict(PredictRequest req) {
+        // 将 payload 内容展开到顶层，与 target/horizon/asOf 合并，匹配模型 API 结构
+        Map<String, Object> modelReq = new HashMap<>(req.getPayload());
+        modelReq.put("target", req.getTarget());
+        modelReq.put("horizon", req.getHorizon());
+        if (req.getAsOf() != null) {
+            modelReq.put("asOf", req.getAsOf().toString());
+        }
         return restClient.post()
                 .uri(baseUrl + "/predict")
-                .body(req)
+                .body(modelReq)
                 .retrieve()
                 .body(PredictResponse.class);
     }
