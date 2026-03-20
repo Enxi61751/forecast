@@ -1,11 +1,16 @@
 <template>
   <section class="section-grid">
-    <h1 class="page-title">汇率预测</h1>
-    <p class="page-subtitle">前端只负责请求与展示，算法计算由后端完成。</p>
+    <h1 class="page-title">原油价格预测</h1>
+    <p class="page-subtitle">展示经过算法计算后的原油价格预测结果。</p>
 
     <PredictControlForm :loading="isRunning" @run="onRun" />
 
-    <RunStatusPanel :phase="runState.phase" :progress="runState.progress" :message="runState.message" :run-id="runState.runId" />
+    <RunStatusPanel
+      :phase="runState.phase"
+      :progress="runState.progress"
+      :message="runState.message"
+      :run-id="runState.runId"
+    />
 
     <AsyncState
       :status="resultStatus"
@@ -15,7 +20,13 @@
       show-retry
       @retry="rerun"
     >
-      <ChartPanel title="预测结果趋势" :labels="resultLabels" :values="resultValues" :height="280" :enable-zoom="true">
+      <ChartPanel
+        title="预测结果趋势"
+        :labels="resultLabels"
+        :values="resultValues"
+        :height="280"
+        :enable-zoom="true"
+      >
         <template #head-extra>
           <span class="run-tip">{{ runState.message }}</span>
         </template>
@@ -27,7 +38,12 @@
         :confidence="prediction?.summary.confidence || 0"
       />
 
-      <ReportPanel :title="reportTitle" :content="reportContent" :can-download="Boolean(reportContent)" @download="downloadReport" />
+      <ReportPanel
+        :title="reportTitle"
+        :content="reportContent"
+        :can-download="Boolean(reportContent)"
+        @download="downloadReport"
+      />
     </AsyncState>
   </section>
 </template>
@@ -40,13 +56,21 @@ import ReportPanel from "@/components/common/ReportPanel.vue";
 import PredictControlForm from "@/components/predict/PredictControlForm.vue";
 import PredictSummaryCards from "@/components/predict/PredictSummaryCards.vue";
 import RunStatusPanel from "@/components/predict/RunStatusPanel.vue";
-import { generateReport, getReport, getRunStatus, runPrediction } from "@/api";
+import { getRunStatus, runPrediction } from "@/api";
 import type { LoadStatus } from "@/types/common";
-import type { PredictionResult, PredictionRunState, RunStatus } from "@/types/predict";
+import type { PredictionRunState } from "@/types/predict";
 
+type PagePredictionResult = {
+  runId: string;
+  forecast: { time: string; value: number }[];
+  summary: {
+    trend: string;
+    risk: string;
+    confidence: number;
+  };
+  reportPreview: string;
+};
 const defaultError = "预测任务失败";
-const pollingIntervalMs = 650;
-const maxPollingAttempts = 8;
 
 const runState = ref<PredictionRunState>({
   phase: "idle",
@@ -55,12 +79,14 @@ const runState = ref<PredictionRunState>({
   message: "任务未开始",
   error: null
 });
+
 const reportTitle = ref("AI 分析报告");
 const reportContent = ref("");
-const prediction = ref<PredictionResult | null>(null);
+const prediction = ref<PagePredictionResult | null>(null);
 const lastParams = ref<{ target: string; horizon: string } | null>(null);
 
 const isRunning = computed(() => runState.value.phase === "running");
+
 const resultStatus = computed<LoadStatus>(() => {
   if (runState.value.phase === "running") return "loading";
   if (runState.value.phase === "success") return "success";
@@ -77,110 +103,66 @@ function resetResultArea(): void {
   reportContent.value = "";
 }
 
-async function sleep(ms: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function waitForTerminalStatus(runId: string): Promise<RunStatus> {
-  let last: RunStatus = {
-    runId,
-    stage: "running",
-    progress: runState.value.progress,
-    message: runState.value.message
-  };
-
-  for (let attempt = 0; attempt < maxPollingAttempts; attempt += 1) {
-    const status = await getRunStatus(runId);
-    last = status;
-
-    runState.value = {
-      phase: "running",
-      runId,
-      progress: Math.max(0, Math.min(100, status.progress)),
-      message: status.message,
-      error: null
-    };
-
-    if (status.stage === "completed" || status.stage === "failed") {
-      return status;
-    }
-
-    await sleep(pollingIntervalMs);
-  }
-
-  throw new Error("运行状态查询超时，请稍后重试");
-}
-
 async function onRun(params: { target: string; horizon: string }): Promise<void> {
   if (isRunning.value) return;
+
   lastParams.value = params;
   resetResultArea();
 
   runState.value = {
     phase: "running",
     runId: null,
-    progress: 8,
+    progress: 15,
     message: "正在提交预测任务",
     error: null
   };
 
   try {
-    const runResult = await runPrediction({
-      target: params.target,
-      horizon: params.horizon,
-      payload: {
-        model: "ForecastModel-V1",
-        algorithms: ["CEEMDAN", "LightGBM+TFT"]
-      },
-      asOf: new Date().toISOString()
+    const health = await getRunStatus();
+
+    runState.value = {
+      phase: "running",
+      runId: null,
+      progress: 35,
+      message: `后端状态：${health.status}`,
+      error: null
+    };
+
+    const predictRes = await runPrediction({
+      modelType: params.target,
+      horizon: Number(params.horizon)
     });
 
-    runState.value = {
-      phase: "running",
-      runId: runResult.runId,
-      progress: 20,
-      message: "预测任务已创建，正在获取运行状态",
-      error: null
+    const mappedPrediction: PagePredictionResult = {
+      runId: `${Date.now()}`,
+      forecast: predictRes.result.map((item) => ({
+        time: item.date,
+        value: item.value
+      })),
+      summary: {
+        trend: predictRes.result.length >= 2 && predictRes.result[predictRes.result.length - 1].value >= predictRes.result[0].value
+          ? "upward"
+          : "downward",
+        risk: "medium",
+        confidence: 0.75
+      },
+      reportPreview: `模型 ${predictRes.modelType} 已完成预测，共生成 ${predictRes.result.length} 个时间点。`
     };
 
-    const terminalStatus = await waitForTerminalStatus(runResult.runId);
-    if (terminalStatus.stage === "failed") {
-      runState.value = {
-        phase: "error",
-        runId: runResult.runId,
-        progress: terminalStatus.progress,
-        message: terminalStatus.message,
-        error: terminalStatus.message
-      };
-      return;
-    }
+    prediction.value = mappedPrediction;
 
-    prediction.value = runResult;
-    runState.value = {
-      phase: "running",
-      runId: runResult.runId,
-      progress: 92,
-      message: "预测完成，正在生成报告",
-      error: null
-    };
-
-    const reportId = await generateReport(runResult.runId);
-    const report = await getReport(reportId);
-    reportTitle.value = report.title;
-    reportContent.value = report.content || runResult.reportPreview;
-
-    if (!reportContent.value) {
-      reportContent.value = runResult.reportPreview;
-    }
+    reportTitle.value = "AI 分析报告";
+    reportContent.value = mappedPrediction.reportPreview;
 
     runState.value = {
       phase: "success",
-      runId: runResult.runId,
+      runId: mappedPrediction.runId,
       progress: 100,
-      message: "预测与报告生成完成",
+      message: "预测完成",
       error: null
     };
   } catch (error) {
+    console.error(error);
     runState.value = {
       phase: "error",
       runId: runState.value.runId,
@@ -208,6 +190,7 @@ function rerun(): void {
 
 function downloadReport(): void {
   if (!reportContent.value) return;
+
   const blob = new Blob([reportContent.value], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

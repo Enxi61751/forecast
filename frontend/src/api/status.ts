@@ -1,12 +1,16 @@
-import { getMockRunStatus } from "@/mocks";
-import type { RunStatus } from "@/types/predict";
-import { adaptRunStatus, type RunStatusRawResponse } from "./adapters/statusAdapter";
 import { requestWithFallback } from "./http";
 
-export async function getRunStatus(runId: string): Promise<RunStatus> {
-  return requestWithFallback<RunStatusRawResponse, RunStatus>({
-    path: `/api/predict/status/${encodeURIComponent(runId)}`,
-    mocker: () => getMockRunStatus(runId),
-    mapReal: (raw) => adaptRunStatus(raw, runId)
+export interface RunStatus {
+  status: string;
+  time: string;
+}
+
+export function getRunStatus() {
+  return requestWithFallback<RunStatus, RunStatus>({
+    path: "/api/health",
+    mocker: async () => ({
+      status: "MOCK-UP",
+      time: new Date().toISOString()
+    })
   });
 }

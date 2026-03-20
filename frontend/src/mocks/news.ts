@@ -5,7 +5,7 @@ export const mockNews: NewsItem[] = [
     id: "n1",
     title: "国际能源组织上调短期需求预期",
     source: "Reuters",
-    summary: "需求预期上调带动风险资产情绪修复，汇率波动预期略有抬升。",
+    summary: "需求预期上调带动风险资产情绪修复，价格波动预期略有抬升。",
     url: "https://example.com/news/1",
     publishedAt: "2026-03-09T06:30:00Z",
     sentimentLabel: "Positive",

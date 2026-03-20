@@ -10,8 +10,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/", name: "home", component: HomePage, meta: { title: "首页" } },
-    { path: "/exchange", name: "exchange", component: ExchangePage, meta: { title: "实时汇率" } },
-    { path: "/forecast", name: "forecast", component: ForecastPage, meta: { title: "汇率预测" } },
+    { path: "/exchange", name: "exchange", component: ExchangePage, meta: { title: "实时原油价格" } },
+    { path: "/forecast", name: "forecast", component: ForecastPage, meta: { title: "原油价格预测" } },
     { path: "/news-events", name: "news-events", component: NewsEventsPage, meta: { title: "新闻与事件" } },
     { path: "/explainability", name: "explainability", component: ExplainabilityPage, meta: { title: "可解释性分析" } },
     { path: "/:pathMatch(.*)*", name: "not-found", component: NotFoundPage, meta: { title: "页面不存在" } }

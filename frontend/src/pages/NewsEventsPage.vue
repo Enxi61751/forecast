@@ -1,9 +1,15 @@
 <template>
   <section class="section-grid">
     <h1 class="page-title">新闻与情绪 / 事件</h1>
-    <p class="page-subtitle">接口未就绪时自动回退 mock mode，页面持续可展示。</p>
+    <p class="page-subtitle">展示近期新闻、情绪变化与关键事件信息。</p>
 
-    <AsyncState :status="status" :error-message="errorMessage" empty-text="暂无新闻和事件" show-retry @retry="loadData">
+    <AsyncState
+      :status="status"
+      :error-message="errorMessage"
+      empty-text="暂无新闻和事件"
+      show-retry
+      @retry="loadData"
+    >
       <div class="grid-two">
         <NewsList :items="news" />
         <EventTimeline :items="events" />
@@ -17,7 +23,7 @@ import { onMounted, ref } from "vue";
 import AsyncState from "@/components/common/AsyncState.vue";
 import NewsList from "@/components/news/NewsList.vue";
 import EventTimeline from "@/components/events/EventTimeline.vue";
-import { getRecentEvents, getRecentNews } from "@/api";
+import { getEventList, getNewsList } from "@/api";
 import type { LoadStatus } from "@/types/common";
 import type { EventItem } from "@/types/events";
 import type { NewsItem } from "@/types/news";
@@ -31,10 +37,14 @@ async function loadData(): Promise<void> {
   status.value = "loading";
 
   try {
-    const [newsData, eventData] = await Promise.all([getRecentNews(7), getRecentEvents()]);
-    news.value = newsData;
-    events.value = eventData;
-    status.value = newsData.length || eventData.length ? "success" : "empty";
+    const [newsRes, eventRes] = await Promise.all([
+      getNewsList(),
+      getEventList()
+    ]);
+
+    news.value = newsRes.list;
+    events.value = eventRes.list;
+    status.value = newsRes.list.length || eventRes.list.length ? "success" : "empty";
   } catch (error) {
     console.error(error);
     errorMessage.value = error instanceof Error ? error.message : "获取新闻与事件失败";

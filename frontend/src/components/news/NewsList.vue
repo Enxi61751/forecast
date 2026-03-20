@@ -34,8 +34,10 @@ function badgeTone(label: SentimentLabel): "positive" | "neutral" | "negative" {
   return "neutral";
 }
 
-function badgeLabel(label: SentimentLabel, score: number): string {
-  return `${label} ${score.toFixed(2)}`;
+function badgeLabel(label: SentimentLabel | undefined, score: number | undefined): string {
+  const safeLabel = label ?? "Neutral";
+  const safeScore = typeof score === "number" ? score.toFixed(2) : "--";
+  return `${safeLabel} ${safeScore}`;
 }
 
 function formatTime(value: string): string {

@@ -16,8 +16,8 @@ import { RouterLink } from "vue-router";
 
 const navItems = [
   { to: "/", label: "首页" },
-  { to: "/exchange", label: "实时汇率" },
-  { to: "/forecast", label: "汇率预测" },
+  { to: "/exchange", label: "实时原油价格" },
+  { to: "/forecast", label: "原油价格预测" },
   { to: "/news-events", label: "新闻与事件" },
   { to: "/explainability", label: "可解释性分析" }
 ];

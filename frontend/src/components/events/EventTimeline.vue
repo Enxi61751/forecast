@@ -10,7 +10,7 @@
         <div class="content">
           <div class="row">
             <h4>{{ event.eventType }}</h4>
-            <span class="intensity">强度 {{ event.intensity.toFixed(2) }}</span>
+            <span class="intensity">强度 {{ typeof event.intensity === 'number' ? event.intensity.toFixed(2) : '--' }}</span>
           </div>
           <p>{{ event.summary }}</p>
           <time>{{ formatTime(event.occurredAt) }}</time>

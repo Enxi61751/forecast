@@ -1,11 +1,22 @@
 <template>
   <section class="section-grid">
-    <h1 class="page-title">实时汇率</h1>
+    <h1 class="page-title">实时原油价格</h1>
     <p class="page-subtitle">点击卡片查看不同时间范围的趋势详情。</p>
 
-    <AsyncState :status="status" :error-message="errorMessage" empty-text="暂无汇率数据" show-retry @retry="loadRates">
+    <AsyncState
+      :status="status"
+      :error-message="errorMessage"
+      empty-text="暂无原油价格数据"
+      show-retry
+      @retry="loadRates"
+    >
       <section class="rate-grid">
-        <ExchangeRateCard v-for="item in rates" :key="item.id" :data="item" @open="openDetail" />
+        <ExchangeRateCard
+          v-for="item in rates"
+          :key="item.id"
+          :data="item"
+          @open="openDetail"
+        />
       </section>
     </AsyncState>
 
@@ -28,7 +39,7 @@ import type { LoadStatus } from "@/types/common";
 import type { ExchangeRateCardData, ExchangeTimeRange } from "@/types/exchange";
 
 const status = ref<LoadStatus>("loading");
-const errorMessage = ref("获取汇率数据失败");
+const errorMessage = ref("获取原油价格数据失败");
 const rates = ref<ExchangeRateCardData[]>([]);
 const selected = ref<ExchangeRateCardData | null>(null);
 const showModal = ref(false);
@@ -40,15 +51,72 @@ function openDetail(data: ExchangeRateCardData): void {
   showModal.value = true;
 }
 
+function buildTrend(baseRate: number): Record<ExchangeTimeRange, number[]> {
+  return {
+    "1W": [
+      Number((baseRate - 0.08).toFixed(2)),
+      Number((baseRate - 0.04).toFixed(2)),
+      Number((baseRate - 0.02).toFixed(2)),
+      Number(baseRate.toFixed(2)),
+      Number((baseRate + 0.01).toFixed(2)),
+      Number((baseRate + 0.03).toFixed(2)),
+      Number((baseRate + 0.02).toFixed(2))
+    ],
+    "1M": [
+      Number((baseRate - 0.15).toFixed(2)),
+      Number((baseRate - 0.10).toFixed(2)),
+      Number((baseRate - 0.05).toFixed(2)),
+      Number(baseRate.toFixed(2))
+    ],
+    "6M": [
+      Number((baseRate - 0.30).toFixed(2)),
+      Number((baseRate - 0.22).toFixed(2)),
+      Number((baseRate - 0.12).toFixed(2)),
+      Number((baseRate - 0.06).toFixed(2)),
+      Number(baseRate.toFixed(2)),
+      Number((baseRate + 0.08).toFixed(2))
+    ]
+  };
+}
+
+function buildLabels(date: string): Record<ExchangeTimeRange, string[]> {
+  return {
+    "1W": ["D1", "D2", "D3", "D4", "D5", "D6", "D7"],
+    "1M": ["W1", "W2", "W3", "W4"],
+    "6M": ["M1", "M2", "M3", "M4", "M5", date]
+  };
+}
+
 async function loadRates(): Promise<void> {
   status.value = "loading";
   try {
-    const data = await getExchangeRates();
-    rates.value = data;
-    status.value = data.length ? "success" : "empty";
+    const res = await getExchangeRates();
+
+    rates.value = res.list.map((item, index) => {
+      const trend = buildTrend(item.rate);
+      const latestWeek = trend["1W"];
+      const first = latestWeek[0];
+      const last = latestWeek[latestWeek.length - 1];
+      const change = Number((last - first).toFixed(2));
+
+      return {
+        id: `oil-${index}`,
+        pair: "WTI/USD",
+        name: "原油价格",
+        price: item.rate,
+        change,
+        high: Math.max(...latestWeek),
+        low: Math.min(...latestWeek),
+        updatedAt: item.date,
+        trend,
+        labels: buildLabels(item.date)
+      };
+    });
+
+    status.value = rates.value.length ? "success" : "empty";
   } catch (error) {
     console.error(error);
-    errorMessage.value = error instanceof Error ? error.message : "获取汇率数据失败";
+    errorMessage.value = error instanceof Error ? error.message : "获取原油价格数据失败";
     status.value = "error";
   }
 }

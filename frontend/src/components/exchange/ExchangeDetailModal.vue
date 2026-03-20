@@ -19,7 +19,7 @@
         </button>
       </div>
 
-      <ChartPanel title="汇率趋势" :labels="selected.labels[range]" :values="selected.trend[range]" :height="280" :enable-zoom="true" />
+      <ChartPanel title="原油价格趋势" :labels="selected.labels[range]" :values="selected.trend[range]" :height="280" :enable-zoom="true" />
     </section>
   </div>
 </template>

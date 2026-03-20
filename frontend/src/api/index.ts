@@ -1,6 +1,6 @@
 export { runPrediction, getLatestPrediction } from "./predict";
-export { generateReport, getReport } from "./report";
+export { getReportList, getReportList as getReport, generateReport } from "./report";
 export { getRunStatus } from "./status";
-export { getRecentNews } from "./news";
-export { getRecentEvents } from "./events";
-export { getExchangeRates } from "./exchange";
+export { getNewsList, getNewsList as getRecentNews } from "./news";
+export { getEventList, getEventList as getRecentEvents } from "./events";
+export { getExchangeList, getExchangeList as getExchangeRates } from "./exchange";
