@@ -1,13 +1,15 @@
 # app/features.py
+from __future__ import annotations
+
 import numpy as np
-from typing import List, Dict, Tuple
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
 
 def build_tabular_features(
     y: np.ndarray,
-    imfs: np.ndarray | None,
+    imfs: Optional[np.ndarray],
     indicators_last: Dict[str, float],
-    sentiment_last: float | None,
+    sentiment_last: Optional[float],
     events: list,
 ) -> Tuple[np.ndarray, Dict]:
     last_price = float(y[-1])
