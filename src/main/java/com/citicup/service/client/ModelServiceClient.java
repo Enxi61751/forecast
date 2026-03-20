@@ -22,6 +22,9 @@ public class ModelServiceClient {
     @Value("${app.model-service.base-url}")
     private String baseUrl;
 
+    @Value("${app.agent-service.base-url}")
+    private String agentBaseUrl;
+
     @Value("${app.llm.api-key}")
     private String llmApiKey;
 
@@ -52,9 +55,75 @@ public class ModelServiceClient {
     }
 
     public String simulateAgents(AgentSimRequest req) {
+        // Build stagex2 SingleStepRequest from prediction context
+        // factor_snapshot
+        Map<String, Object> factorSnapshot = new HashMap<>();
+        factorSnapshot.put("trend_score", 0.0);
+        factorSnapshot.put("rsi_status", "Neutral");
+        factorSnapshot.put("term_structure", "Contango");
+
+        // tail_risk_report
+        Map<String, Object> tailRisk = new HashMap<>();
+        tailRisk.put("gamma_profile", "Neutral");
+        tailRisk.put("liquidity_stress", 0.3);
+
+        // market_microstructure
+        Map<String, Object> microstructure = new HashMap<>();
+        microstructure.put("bid_ask_spread", 0.05);
+        microstructure.put("order_book_depth", "Normal");
+
+        // session_info
+        Map<String, Object> sessionInfo = new HashMap<>();
+        sessionInfo.put("phase", "Mid-Day");
+        sessionInfo.put("time_to_close", 240);
+
+        // environment
+        Map<String, Object> environment = new HashMap<>();
+        environment.put("factor_snapshot", factorSnapshot);
+        environment.put("tail_risk_report", tailRisk);
+        environment.put("market_microstructure", microstructure);
+        environment.put("session_info", sessionInfo);
+
+        // event — derive headline/body from prediction data
+        String forecastBody = req.getForecastJson() != null ? req.getForecastJson() : "No forecast data";
+        Map<String, Object> event = new HashMap<>();
+        event.put("headline", String.format("Oil price forecast: %s over %s", req.getTarget(), req.getHorizon()));
+        event.put("body", forecastBody.length() > 1000 ? forecastBody.substring(0, 1000) : forecastBody);
+        event.put("source", "CitiCup Model");
+        event.put("impact_type", "price");
+        event.put("sentiment_score", 0.0);
+
+        // self_state — CTA archetype as default agent template
+        Map<String, Object> selfState = new HashMap<>();
+        selfState.put("role", "CTA");
+        selfState.put("mandate", "trend-following momentum strategy");
+        selfState.put("hedger_type", "neutral");
+        selfState.put("max_leverage", 3.0);
+        selfState.put("stop_loss_pct", 0.05);
+        selfState.put("position", 0.0);
+        selfState.put("unrealized_pnl", 0.0);
+        selfState.put("unrealized_pnl_pct", 0.0);
+        selfState.put("cash_level", 1000000.0);
+        selfState.put("last_action", "NONE");
+        selfState.put("consecutive_losses", 0);
+        selfState.put("view_history", "neutral");
+
+        // simulation_input — note stagex2 uses alias "self" for self_state
+        Map<String, Object> simulationInput = new HashMap<>();
+        simulationInput.put("environment", environment);
+        simulationInput.put("event", event);
+        simulationInput.put("self", selfState);
+
+        // top-level SingleStepRequest — note stagex2 uses alias "input" for simulation_input
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("input", simulationInput);
+        requestBody.put("current_price", 80.0);
+        requestBody.put("current_volatility", 0.2);
+        requestBody.put("dealer_inventory", 100);
+
         return restClient.post()
-                .uri(baseUrl + "/agents/simulate")
-                .body(req)
+                .uri(agentBaseUrl + "/simulate/single")
+                .body(requestBody)
                 .retrieve()
                 .body(String.class);
     }

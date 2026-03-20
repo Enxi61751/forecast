@@ -21,7 +21,9 @@ spring:
 
 app:
   model-service:
-    base-url: http://localhost:8000  # FastAPI
+    base-url: http://localhost:8000  # model-remote FastAPI (predict + sentiment)
+  agent-service:
+    base-url: http://localhost:8001  # stagex2 agent simulation service
   cache:
     ttl-seconds: 120
 
