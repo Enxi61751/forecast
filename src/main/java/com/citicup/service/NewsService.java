@@ -11,6 +11,7 @@ import com.citicup.repository.SentimentScoreRepo;
 import com.citicup.service.client.ModelServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -23,6 +24,7 @@ public class NewsService {
     private final ExtremeEventRepo eventRepo;
     private final ModelServiceClient modelClient;
 
+    @Transactional
     public Long ingestAndScore(NewsIngestRequest req) {
         NewsArticle saved = newsRepo.save(
                 NewsArticle.builder()

@@ -9,6 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
@@ -18,6 +19,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+      repositories:
+        enabled: false
 
 app:
   model-service:

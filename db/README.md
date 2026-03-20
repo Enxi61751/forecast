@@ -19,6 +19,7 @@ db/
 | 文件 | 说明 |
 |---|---|
 | `V1__add_indicator_daily_fields.sql` | 为 `indicator_daily` 表添加情绪聚合字段 |
+| `V2__create_oil_price_daily_ohlcv.sql` | 新建 `oil_price_daily_ohlcv` 表（LCO1 日线 OHLCV） |
 
 > 项目使用 `ddl-auto: none`，所有 schema 变更须手动执行 SQL。
 
@@ -26,18 +27,20 @@ db/
 
 ## scripts/ — 数据导入脚本
 
-依赖：`pip install mysql-connector-python`
+依赖：`pip install mysql-connector-python openpyxl`
 
 | 文件 | 导入目标 | 说明 |
 |---|---|---|
 | `import_events.py` | `news_article` + `extreme_event` + `sentiment_score` | 导入事件新闻数据，每行 CSV 拆分写入三张表 |
 | `import_sentiment_daily.py` | `indicator_daily` | 导入每日情绪聚合数据 |
+| `import_lco1_ohlcv.py` | `oil_price_daily_ohlcv` | 导入 LCO1 日线 OHLCV 数据（5386 条，xlsx 来源） |
 
 **运行方式（从项目根目录执行）：**
 
 ```bash
 python3 db/scripts/import_events.py
 python3 db/scripts/import_sentiment_daily.py
+python3 db/scripts/import_lco1_ohlcv.py
 ```
 
 数据库连接配置在脚本顶部的 `DB_CONFIG`，与 `application-local.yml` 保持一致。
@@ -50,6 +53,7 @@ python3 db/scripts/import_sentiment_daily.py
 |---|---|---|
 | `event_detail.csv` | 1000 | 石油相关新闻事件（含情绪方向、强度、来源） |
 | `sentiment_daily_aggregation.csv` | 1482 | 每日情绪聚合统计（2020-08-28 至 2026-03-10） |
+| `LCO1-伦敦布伦特原油期货历史数据.xlsx` | 5386 | LCO1 日线 OHLCV 数据（2006-01-03 至 2026-02-20） |
 
 ---
 
@@ -60,3 +64,4 @@ python3 db/scripts/import_sentiment_daily.py
 | `数据导入说明.md` | `event_detail.csv` 字段映射与导入方式 |
 | `sentiment_daily_聚合数据导入说明.md` | `indicator_daily` 表改造说明与字段映射 |
 | `系统测试报告.md` | 后端与模型服务的联调测试报告（含 Bug 修复记录） |
+| `LCO1历史数据导入说明.md` | `oil_price_daily_ohlcv` 表设计、字段映射与导入步骤 |
