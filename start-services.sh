@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-STAGEX2_DIR=~/stagex2/stagex2/stagex2-source-package/stagex2-source-package
+AGENT_DIR="$SCRIPT_DIR/agent-service"
 
 # ── 1. Model Service (model-remote branch, port 8000) ────────────────────────
 MODEL_DIR="$SCRIPT_DIR/.model-service"
@@ -13,7 +13,7 @@ if [ ! -d "$MODEL_DIR" ]; then
 fi
 
 echo "[model-service] Setting up Python venv ..."
-python3 -m venv "$MODEL_DIR/.venv" --quiet
+python3 -m venv "$MODEL_DIR/.venv"
 "$MODEL_DIR/.venv/bin/pip" install -q -r "$MODEL_DIR/requirements.txt"
 
 echo "[model-service] Starting on port 8000 ..."
@@ -23,18 +23,18 @@ MODEL_PID=$!
 echo "  PID=$MODEL_PID"
 cd "$SCRIPT_DIR"
 
-# ── 2. Agent Service (stagex2, port 8001) ────────────────────────────────────
+# ── 2. Agent Service (agent-service/, port 8001) ─────────────────────────────
 echo "[agent-service] Setting up Python venv ..."
-python3 -m venv "$STAGEX2_DIR/.venv" --quiet
-"$STAGEX2_DIR/.venv/bin/pip" install -q -r "$STAGEX2_DIR/requirements.txt"
+python3 -m venv "$AGENT_DIR/.venv"
+"$AGENT_DIR/.venv/bin/pip" install -q -r "$AGENT_DIR/requirements.txt"
 
 echo "[agent-service] Starting on port 8001 ..."
-cd "$STAGEX2_DIR"
+cd "$AGENT_DIR"
 set -a
 # shellcheck disable=SC1091
-[ -f stagex2.env ] && source stagex2.env
+[ -f .env ] && source .env
 set +a
-"$STAGEX2_DIR/.venv/bin/uvicorn" src.stagex2.api:app --host 0.0.0.0 --port 8001 &
+"$AGENT_DIR/.venv/bin/uvicorn" src.stagex2.api:app --host 0.0.0.0 --port 8001 &
 AGENT_PID=$!
 echo "  PID=$AGENT_PID"
 cd "$SCRIPT_DIR"

@@ -30,4 +30,17 @@ bin/
 .DS_Store
 
 ### Secrets ###
-src/main/resources/application-local.ymltarget/
+src/main/resources/application-local.yml
+
+### Build artifacts ###
+target/
+
+### Agent service — never commit real API keys ###
+agent-service/.env
+agent-service/stagex2.env
+agent-service/**/__pycache__/
+agent-service/**/*.pyc
+agent-service/.venv*/
+
+### Model service worktree ###
+.model-service/
