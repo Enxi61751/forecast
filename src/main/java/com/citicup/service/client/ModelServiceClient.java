@@ -162,4 +162,8 @@ public class ModelServiceClient {
         }
         return content;
     }
+
+    public String generateReport(String prompt) {
+        return callLlm(prompt);
+    }
 }

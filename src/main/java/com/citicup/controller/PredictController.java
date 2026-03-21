@@ -1,30 +1,40 @@
 package com.citicup.controller;
 
+import com.citicup.common.ApiResponse;
+import com.citicup.dto.predict.PredictRequest;
+import com.citicup.dto.predict.PredictResponse;
+import com.citicup.service.PredictService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/predict")
 public class PredictController {
 
-    @PostMapping("/api/predict")
-    public Map<String, Object> predict(@RequestBody Map<String, Object> payload) {
-        Object modelType = payload.get("modelType");
+    private final PredictService predictService;
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 0);
-        result.put("message", "success");
+    public PredictController(PredictService predictService) {
+        this.predictService = predictService;
+    }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("modelType", modelType == null ? "unknown" : modelType.toString());
-        data.put("result", List.of(
-                Map.of("date", "2026-04-01", "value", 7.68),
-                Map.of("date", "2026-05-01", "value", 7.72)
-        ));
+    /**
+     * 浏览器地址栏访问为 GET；预测实际需 POST + JSON。此处返回说明，避免误以为服务不可用。
+     */
+    @GetMapping
+    public ApiResponse<Map<String, String>> usage() {
+        Map<String, String> hint = new LinkedHashMap<>();
+        hint.put("message", "预测请使用 POST，Content-Type: application/json");
+        hint.put("paths", "POST /api/predict 或 POST /api/predict/run");
+        hint.put("exampleBody", "{\"target\":\"WTI\",\"horizon\":\"7d\",\"payload\":{}}");
+        return ApiResponse.ok(hint);
+    }
 
-        result.put("data", data);
-        return result;
+    @PostMapping(value = {"", "/run"})
+    public ApiResponse<PredictResponse> predict(@Valid @RequestBody PredictRequest request) {
+        PredictResponse response = predictService.runPrediction(request);
+        return ApiResponse.ok(response);
     }
 }

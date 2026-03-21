@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_normalResponse_returnsContent() {
         Map<String, Object> message = Map.of("role", "assistant", "content", "油价风险分析内容");
         Map<String, Object> choice = Map.of("message", message);
@@ -51,7 +50,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_nullResponse_throwsWithClearMessage() {
         when(responseSpec.body(Map.class)).thenReturn(null);
 
@@ -60,7 +58,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_missingChoicesKey_throwsWithClearMessage() {
         when(responseSpec.body(Map.class)).thenReturn(Map.of("id", "xyz"));
 
@@ -69,7 +66,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_emptyChoicesList_throwsWithClearMessage() {
         when(responseSpec.body(Map.class)).thenReturn(Map.of("choices", List.of()));
 
@@ -78,7 +74,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_nullMessage_throwsWithClearMessage() {
         Map<String, Object> choice = new HashMap<>();
         choice.put("message", null);
@@ -89,7 +84,6 @@ class ModelServiceClientLlmTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void callLlm_nullContent_throwsWithClearMessage() {
         Map<String, Object> message = new HashMap<>();
         message.put("content", null);

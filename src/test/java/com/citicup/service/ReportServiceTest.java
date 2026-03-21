@@ -35,8 +35,9 @@ class ReportServiceTest {
                 .extremeClsJson("{\"cls\":0}")
                 .build();
         when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+        when(reportRepo.findByPredictionRunId(1L)).thenReturn(Optional.empty());
         when(modelClient.simulateAgents(any())).thenReturn("{\"agents\":\"分析结果\"}");
-        when(modelClient.callLlm(any())).thenReturn("风险快报正文内容...");
+        when(modelClient.generateReport(any())).thenReturn("风险快报正文内容...");
 
         RiskReport savedReport = RiskReport.builder()
                 .id(99L).predictionRunId(1L).createdAt(Instant.now())
@@ -44,12 +45,38 @@ class ReportServiceTest {
                 .build();
         when(reportRepo.save(any())).thenReturn(savedReport);
 
-        Long reportId = reportService.generateReport(1L);
+        RiskReport result = reportService.generateReport(1L);
 
-        assertEquals(99L, reportId);
+        assertEquals(99L, result.getId());
         verify(modelClient).simulateAgents(any());
-        verify(modelClient).callLlm(any());
+        verify(modelClient).generateReport(any());
         verify(reportRepo).save(any());
+    }
+
+    @Test
+    void generateReport_updatesWhenReportAlreadyExists() {
+        PredictionRun run = PredictionRun.builder()
+                .id(1L).target("WTI").horizon("7d")
+                .runAt(Instant.now())
+                .forecastJson("{}")
+                .extremeClsJson("{}")
+                .build();
+        when(runRepo.findById(1L)).thenReturn(Optional.of(run));
+        RiskReport existing = RiskReport.builder()
+                .id(42L).predictionRunId(1L).createdAt(Instant.parse("2020-01-01T00:00:00Z"))
+                .reportText("old").materialsJson("{}")
+                .build();
+        when(reportRepo.findByPredictionRunId(1L)).thenReturn(Optional.of(existing));
+        when(modelClient.simulateAgents(any())).thenReturn("{\"new\":\"mat\"}");
+        when(modelClient.generateReport(any())).thenReturn("new text");
+        when(reportRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        RiskReport result = reportService.generateReport(1L);
+
+        assertEquals(42L, result.getId());
+        assertEquals("new text", result.getReportText());
+        assertEquals("{\"new\":\"mat\"}", result.getMaterialsJson());
+        verify(reportRepo).save(existing);
     }
 
     @Test

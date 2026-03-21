@@ -3,6 +3,7 @@ package com.citicup.controller;
 import com.citicup.entity.News;
 import com.citicup.service.NewsService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/news")
 public class NewsController {
 
     private final NewsService newsService;
@@ -18,7 +20,7 @@ public class NewsController {
         this.newsService = newsService;
     }
 
-    @GetMapping("/api/news/list")
+    @GetMapping("/list")
     public Map<String, Object> list() {
         List<News> newsList = newsService.getNewsList();
 

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface RiskReportRepo extends JpaRepository<RiskReport, Long> {
 
+    Optional<RiskReport> findByPredictionRunId(Long predictionRunId);
+
     // 获取 predictionRunId 最大的那条报告
     Optional<RiskReport> findTopByOrderByPredictionRunIdDesc();
 
