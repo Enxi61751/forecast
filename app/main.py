@@ -155,7 +155,9 @@ def predict(req: PredictRequest):
 
         # Generate multi-step forecast: compound the single-step return
         # y_final is the T+1 price; for T+k we apply the same daily change ratio
-        last_price = float(req.series.price[-1].v) if req.series.price else y_final
+        last_price = (float(req.series.price[-1].v)
+                      if req.series is not None and req.series.price
+                      else y_final)
         daily_return = (y_final / last_price - 1.0) if last_price > 0 else 0.0
 
         point_series: List[TimePoint] = []
