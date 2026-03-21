@@ -7,8 +7,10 @@ import com.citicup.repository.PredictionRunRepo;
 import com.citicup.service.client.ModelServiceClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -28,6 +30,7 @@ class PredictServiceTest {
     @Mock PredictionRunRepo runRepo;
     @Mock StringRedisTemplate redis;
     @Mock ValueOperations<String, String> valueOps;
+    @Spy ObjectMapper objectMapper = new ObjectMapper();
     @InjectMocks PredictService predictService;
 
     @Test

@@ -17,9 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class NewsService {
+
+    private static final Logger logger = Logger.getLogger(NewsService.class.getName());
 
     @Autowired
     private NewsArticleRepo newsArticleRepo;
@@ -40,8 +43,24 @@ public class NewsService {
         return newsRepository.findAll();
     }
 
-    @Transactional
     public Long ingestAndScore(NewsIngestRequest req) {
+        // Step 1: save the article first (independent transaction)
+        Long newsId = saveArticle(req);
+
+        // Step 2: call model service outside the DB transaction
+        // If this fails, the article is still saved
+        try {
+            SentimentResponse sr = modelServiceClient.scoreNews(req);
+            saveSentiment(newsId, sr);
+        } catch (Exception e) {
+            logger.warning("Sentiment scoring failed for newsId=" + newsId + ": " + e.getMessage());
+        }
+
+        return newsId;
+    }
+
+    @Transactional
+    protected Long saveArticle(NewsIngestRequest req) {
         NewsArticle saved = newsArticleRepo.save(
                 NewsArticle.builder()
                         .source(req.getSource())
@@ -52,13 +71,14 @@ public class NewsService {
                         .ingestedAt(Instant.now())
                         .build()
         );
+        return saved.getId();
+    }
 
-        // 调 FastAPI 做情绪 + 极端事件识别
-        SentimentResponse sr = modelServiceClient.scoreNews(req);
-
+    @Transactional
+    protected void saveSentiment(Long newsId, SentimentResponse sr) {
         sentimentScoreRepo.save(
                 SentimentScore.builder()
-                        .newsId(saved.getId())
+                        .newsId(newsId)
                         .sentiment(sr.getSentiment())
                         .confidence(sr.getConfidence())
                         .scoredAt(Instant.now())
@@ -69,7 +89,7 @@ public class NewsService {
             for (SentimentResponse.ExtremeEventDto e : sr.getExtremeEvents()) {
                 extremeEventRepo.save(
                         ExtremeEvent.builder()
-                                .newsId(saved.getId())
+                                .newsId(newsId)
                                 .eventType(e.getEventType())
                                 .summary(e.getSummary())
                                 .intensity(e.getIntensity())
@@ -79,7 +99,5 @@ public class NewsService {
                 );
             }
         }
-
-        return saved.getId();
     }
 }

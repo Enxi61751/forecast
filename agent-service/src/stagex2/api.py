@@ -119,4 +119,4 @@ def _dump_result(result: dict) -> dict:
 
 
 if __name__ == "__main__":
-    uvicorn.run("stagex2.api:app", host="0.0.0.0", port=8000)
+    uvicorn.run("stagex2.api:app", host="0.0.0.0", port=8001)

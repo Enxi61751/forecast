@@ -18,6 +18,6 @@ class HealthControllerTest {
         mvc.perform(get("/api/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(0))
-                .andExpect(jsonPath("$.data").value("ok"));
+                .andExpect(jsonPath("$.data.status").value("UP"));
     }
 }

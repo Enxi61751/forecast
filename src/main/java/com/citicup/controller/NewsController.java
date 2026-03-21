@@ -1,12 +1,12 @@
 package com.citicup.controller;
 
+import com.citicup.common.ApiResponse;
+import com.citicup.dto.news.NewsIngestRequest;
 import com.citicup.entity.News;
 import com.citicup.service.NewsService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,18 +21,14 @@ public class NewsController {
     }
 
     @GetMapping("/list")
-    public Map<String, Object> list() {
+    public ApiResponse<Map<String, Object>> list() {
         List<News> newsList = newsService.getNewsList();
+        return ApiResponse.ok(Map.of("total", newsList.size(), "list", newsList));
+    }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 0);
-        result.put("message", "success");
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("total", newsList.size());
-        data.put("list", newsList);
-
-        result.put("data", data);
-        return result;
+    @PostMapping("/ingest")
+    public ApiResponse<Long> ingest(@Valid @RequestBody NewsIngestRequest req) {
+        Long id = newsService.ingestAndScore(req);
+        return ApiResponse.ok(id);
     }
 }

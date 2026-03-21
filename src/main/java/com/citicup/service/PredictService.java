@@ -25,7 +25,7 @@ public class PredictService {
     private final ModelServiceClient modelClient;
     private final PredictionRunRepo runRepo;
     private final StringRedisTemplate redis;
-    private final ObjectMapper om = new ObjectMapper();
+    private final ObjectMapper om;  // injected by Spring (includes JavaTimeModule)
 
     private static String cacheKey(String target, String horizon) {
         return "pred:latest:" + target + ":" + horizon;
