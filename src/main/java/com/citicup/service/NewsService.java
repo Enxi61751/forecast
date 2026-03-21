@@ -3,30 +3,46 @@ package com.citicup.service;
 import com.citicup.dto.news.NewsIngestRequest;
 import com.citicup.dto.news.SentimentResponse;
 import com.citicup.entity.ExtremeEvent;
+import com.citicup.entity.News;
 import com.citicup.entity.NewsArticle;
 import com.citicup.entity.SentimentScore;
 import com.citicup.repository.ExtremeEventRepo;
 import com.citicup.repository.NewsArticleRepo;
+import com.citicup.repository.NewsRepository;
 import com.citicup.repository.SentimentScoreRepo;
 import com.citicup.service.client.ModelServiceClient;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class NewsService {
 
-    private final NewsArticleRepo newsRepo;
-    private final SentimentScoreRepo scoreRepo;
-    private final ExtremeEventRepo eventRepo;
-    private final ModelServiceClient modelClient;
+    @Autowired
+    private NewsArticleRepo newsArticleRepo;
+
+    @Autowired
+    private SentimentScoreRepo sentimentScoreRepo;
+
+    @Autowired
+    private ExtremeEventRepo extremeEventRepo;
+
+    @Autowired
+    private ModelServiceClient modelServiceClient;
+
+    @Autowired
+    private NewsRepository newsRepository;
+
+    public List<News> getNewsList() {
+        return newsRepository.findAll();
+    }
 
     @Transactional
     public Long ingestAndScore(NewsIngestRequest req) {
-        NewsArticle saved = newsRepo.save(
+        NewsArticle saved = newsArticleRepo.save(
                 NewsArticle.builder()
                         .source(req.getSource())
                         .title(req.getTitle())
@@ -38,9 +54,9 @@ public class NewsService {
         );
 
         // 调 FastAPI 做情绪 + 极端事件识别
-        SentimentResponse sr = modelClient.scoreNews(req);
+        SentimentResponse sr = modelServiceClient.scoreNews(req);
 
-        scoreRepo.save(
+        sentimentScoreRepo.save(
                 SentimentScore.builder()
                         .newsId(saved.getId())
                         .sentiment(sr.getSentiment())
@@ -50,8 +66,8 @@ public class NewsService {
         );
 
         if (sr.getExtremeEvents() != null) {
-            for (var e : sr.getExtremeEvents()) {
-                eventRepo.save(
+            for (SentimentResponse.ExtremeEventDto e : sr.getExtremeEvents()) {
+                extremeEventRepo.save(
                         ExtremeEvent.builder()
                                 .newsId(saved.getId())
                                 .eventType(e.getEventType())

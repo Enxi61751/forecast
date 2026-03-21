@@ -3,9 +3,11 @@ server:
 
 spring:
   datasource:
-    url: YOUR_DB_URL
-    username: YOUR_DB_USERNAME
-    password: YOUR_DB_PASSWORD
+    url: jdbc:mysql://123.206.104.63:3306/citicup?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
+    username: citicup_user
+    password: citicup123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: none

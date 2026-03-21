@@ -1,22 +1,30 @@
 package com.citicup.controller;
 
-import com.citicup.common.ApiResponse;
-import com.citicup.dto.predict.PredictRequest;
-import com.citicup.dto.predict.PredictResponse;
-import com.citicup.service.PredictService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/predict")
-@RequiredArgsConstructor
 public class PredictController {
 
-    private final PredictService predictService;
+    @PostMapping("/api/predict")
+    public Map<String, Object> predict(@RequestBody Map<String, Object> payload) {
+        Object modelType = payload.get("modelType");
 
-    @PostMapping("/run")
-    public ApiResponse<PredictResponse> run(@Valid @RequestBody PredictRequest req) {
-        return ApiResponse.ok(predictService.runPrediction(req));
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("message", "success");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("modelType", modelType == null ? "unknown" : modelType.toString());
+        data.put("result", List.of(
+                Map.of("date", "2026-04-01", "value", 7.68),
+                Map.of("date", "2026-05-01", "value", 7.72)
+        ));
+
+        result.put("data", data);
+        return result;
     }
 }
