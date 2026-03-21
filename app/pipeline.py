@@ -123,14 +123,15 @@ class PredictPipeline:
         return "LOW_RISK", p
 
     def run(self, req):
-        # 1) Extract price series from request
-        y = self._extract_price_series(req)
-        if y.size == 0:
-            raise ValueError("price series is empty after cleaning")
-        if y.size < 5:
-            raise ValueError("price series is too short; at least 5 points are required")
+        # 1) Extract price series (series is optional; Spring Boot may send flat payload without it)
+        if req.series is not None and req.series.price:
+            y = self._extract_price_series(req)
+            y = y[np.isfinite(y)]
+        else:
+            y = np.array([], dtype=np.float64)
 
-        last_price = float(y[-1])
+        # Use last known price if series provided, otherwise default to 80 USD (model will override)
+        last_price = float(y[-1]) if y.size > 0 else 80.0
 
         # 2) Determine query date
         query_date = None
@@ -177,8 +178,18 @@ class PredictPipeline:
                 pass  # fall through to stub pipeline
 
         # 4) Fallback: stub/legacy pipeline (CEEMDAN + old lgbm + old tft stubs)
-        indicators_last = self._extract_last_indicators(req)
-        sentiment_last = self._extract_last_sentiment(req)
+        # Requires at least 5 price points; if no series provided skip CEEMDAN/feature building
+        if y.size < 5:
+            return float(last_price), {"label": "UNKNOWN", "prob": 0.0}, {
+                "alpha": 0.5, "notes": "no series provided; stub fallback",
+                "ceemdan": {"enabled": False, "n_imfs": 0, "length": 0,
+                            "entropies": None, "has_residue": False},
+                "imf_contrib": None, "lgbm_top_features": [],
+                "model_outputs": {"lgbm": None, "tft": None},
+            }, {"lgbm": None, "tft": None}
+
+        indicators_last = self._extract_last_indicators(req) if req.series else {}
+        sentiment_last = self._extract_last_sentiment(req) if req.series else None
         imfs, ce_full = self._run_ceemdan(y, req)
 
         X_tab, meta = build_tabular_features(
@@ -186,7 +197,7 @@ class PredictPipeline:
             imfs=imfs,
             indicators_last=indicators_last,
             sentiment_last=sentiment_last,
-            events=getattr(req, "events", None),
+            events=getattr(req, "events", None) or [],
         )
 
         seq_window = min(60, int(y.size))

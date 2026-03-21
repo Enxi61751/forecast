@@ -186,7 +186,10 @@ class AlphaPredictor:
         for model, sel_idx in zip(model_list, selected_features_list):
             try:
                 X_sel = X[:, sel_idx]
-                preds.append(float(model.predict(X_sel)[0]))
+                # Use the underlying LightGBM Booster directly to avoid sklearn wrapper
+                # compatibility issues across LightGBM versions (TypeError in lgb >= 4.0)
+                pred = model.booster_.predict(X_sel)
+                preds.append(float(pred[0]))
             except Exception:
                 pass
 
