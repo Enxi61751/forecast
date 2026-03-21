@@ -134,19 +134,59 @@ def sentiment_score(req: SentimentRequest):
     return SentimentResponseDto(sentiment=sent, confidence=conf, extremeEvents=extreme_events)
 
 
+def _parse_horizon_days(horizon: str) -> int:
+    """Parse horizon string like '1d', '7d', '30d' into number of days."""
+    h = (horizon or "1d").strip().lower()
+    if h.endswith("d"):
+        try:
+            return max(1, int(h[:-1]))
+        except ValueError:
+            pass
+    return 1
+
+
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
     try:
         y_final, extreme, explain, raw = pipe.run(req)
 
-        # 当前先按 T+1 输出；后续可根据 req.horizon 扩展为多步预测
         base_time = req.asOf or datetime.now(timezone.utc)
-        t_next = base_time + timedelta(days=1)
+        n_days = _parse_horizon_days(req.horizon)
+
+        # Generate multi-step forecast: compound the single-step return
+        # y_final is the T+1 price; for T+k we apply the same daily change ratio
+        last_price = float(req.series.price[-1].v) if req.series.price else y_final
+        daily_return = (y_final / last_price - 1.0) if last_price > 0 else 0.0
+
+        point_series: List[TimePoint] = []
+        lower_series: List[TimePoint] = []
+        upper_series: List[TimePoint] = []
+
+        model_outputs = explain.get("model_outputs", {}) if isinstance(explain, dict) else {}
+        lower_90 = model_outputs.get("lower_90")
+        upper_90 = model_outputs.get("upper_90")
+
+        price = y_final
+        for k in range(1, n_days + 1):
+            t_k = base_time + timedelta(days=k)
+            if k == 1:
+                p_k = y_final
+            else:
+                # Simple compounding: apply same daily return for subsequent days
+                p_k = last_price * ((1.0 + daily_return) ** k)
+            point_series.append(TimePoint(t=t_k, v=float(p_k)))
+
+            # Confidence interval widens with horizon (sqrt-of-time rule)
+            spread_factor = k ** 0.5
+            lo = lower_90 if (lower_90 is not None and k == 1) else p_k * (1 - 0.03 * spread_factor)
+            hi = upper_90 if (upper_90 is not None and k == 1) else p_k * (1 + 0.03 * spread_factor)
+            lower_series.append(TimePoint(t=t_k, v=float(lo)))
+            upper_series.append(TimePoint(t=t_k, v=float(hi)))
 
         forecast = Forecast(
-            point=[TimePoint(t=t_next, v=float(y_final))],
-            lower=None,
-            upper=None,
+            point=point_series,
+            lower=lower_series,
+            upper=upper_series,
             raw=raw,
         )
 
