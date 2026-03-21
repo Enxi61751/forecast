@@ -71,7 +71,8 @@ class AlphaPredictor:
         try:
             import pandas as pd
             df = pd.read_csv(path, index_col=0, parse_dates=True)
-            df.index = df.index.map(lambda x: int(str(x).replace("-", "")[:8]))
+            # Convert Timestamp index to YYYYMMDD int for fast lookup
+            df.index = df.index.map(lambda x: int(str(x)[:10].replace("-", "")))
             self._data = df
             log.info("AlphaPredictor: loaded data CSV with shape %s", df.shape)
         except Exception as e:
@@ -165,8 +166,8 @@ class AlphaPredictor:
         if not model_list:
             return None
 
-        # Find features: use exact date or closest past date
-        feature_cols = [c for c in self._data.columns if c != "label"]
+        # Use feature_cols from the saved model if available, otherwise derive from CSV
+        feature_cols = save_data.get("feature_cols") or [c for c in self._data.columns if c != "label"]
         df = self._data
 
         if date_int in df.index:
