@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: com.citicup.controller.HealthControllerTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.580 s <<< FAILURE! -- in com.citicup.controller.HealthControllerTest
+com.citicup.controller.HealthControllerTest.health_returns200WithOkCode -- Time elapsed: 0.748 s <<< FAILURE!
+java.lang.AssertionError: JSON path "$.data" expected:<ok> but was:<null>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:123)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.citicup.controller.HealthControllerTest.health_returns200WithOkCode(HealthControllerTest.java:21)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
