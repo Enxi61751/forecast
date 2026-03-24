@@ -1,4 +1,4 @@
-import { MOCK_RUN_OUTCOME } from "@/api/config";
+﻿import { MOCK_RUN_OUTCOME } from "@/api/config";
 import type { PredictionResult, PredictionRunRequest, ReportData, RunStage, RunStatus } from "@/types/predict";
 
 const runStatusCursor = new Map<string, number>();
@@ -35,16 +35,16 @@ function basePriceByTarget(target: string): number {
 function getMockStatusSteps(): MockStatusStep[] {
   if (MOCK_RUN_OUTCOME === "error") {
     return [
-      { stage: "running", progress: 20, message: "正在拉取特征数据" },
-      { stage: "running", progress: 58, message: "正在执行模型推理" },
-      { stage: "failed", progress: 100, message: "推理服务返回异常，请稍后重试" }
+      { stage: "running", progress: 20, message: "Loading feature data" },
+      { stage: "running", progress: 58, message: "Running model inference" },
+      { stage: "failed", progress: 100, message: "Inference service returned an error" }
     ];
   }
 
   return [
-    { stage: "running", progress: 18, message: "正在拉取特征数据" },
-    { stage: "running", progress: 55, message: "正在执行模型推理" },
-    { stage: "completed", progress: 100, message: "预测任务完成" }
+    { stage: "running", progress: 18, message: "Loading feature data" },
+    { stage: "running", progress: 55, message: "Running model inference" },
+    { stage: "completed", progress: 100, message: "Prediction task completed" }
   ];
 }
 
@@ -63,12 +63,14 @@ export async function runMockPrediction(req: PredictionRunRequest): Promise<Pred
     forecast: dates.map((time, index) => ({ time, value: raw[index] })),
     lowerBound: dates.map((time, index) => ({ time, value: Number((raw[index] * 0.992).toFixed(4)) })),
     upperBound: dates.map((time, index) => ({ time, value: Number((raw[index] * 1.008).toFixed(4)) })),
+    nextDayPoint: { time: dates[0], value: raw[0] },
     summary: {
-      trend: "短期偏震荡上行",
-      risk: "需关注突发事件与情绪放大效应",
-      confidence: 0.83
+      trend: "Short-term rebound",
+      risk: "Watch headlines and inventory updates",
+      confidence: 0.83,
+      explanation: "This is a mock next-day explanation used by the frontend fallback flow."
     },
-    reportPreview: "模型判断未来一周波动中枢略有抬升，建议结合新闻情绪与库存数据动态管理风险敞口。",
+    reportPreview: "Frontend mock prediction completed. Extended explanation content can be replaced after backend alignment.",
     generatedAt: new Date().toISOString()
   };
 }
@@ -94,9 +96,8 @@ export async function getMockReport(reportId: string, runId = "mock-run"): Promi
   return {
     id: reportId,
     runId,
-    title: "AI 风险报告",
-    content:
-      "1. 预测结论: 未来周期主趋势偏稳，局部可能出现尖峰波动。\n2. 风险提示: 重点监控地缘冲突、能源库存变化、政策信号。\n3. 建议: 采用分层止损与仓位动态调节策略。",
+    title: "AI Risk Report",
+    content: "1. Mock conclusion: short-term fluctuation remains manageable.\n2. Key risk: watch inventory, policy, and sentiment shifts.\n3. Suggestion: keep frontend display modular and wait for backend alignment.",
     createdAt: new Date().toISOString()
   };
 }

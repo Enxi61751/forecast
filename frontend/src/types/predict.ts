@@ -15,8 +15,9 @@ export interface PredictionPoint {
 
 export interface PredictionSummary {
   trend: string;
-  risk: string;
-  confidence: number;
+  risk: string | null;
+  confidence: number | null;
+  explanation: string | null;
 }
 
 export interface PredictionResult {
@@ -26,8 +27,9 @@ export interface PredictionResult {
   forecast: PredictionPoint[];
   lowerBound: PredictionPoint[];
   upperBound: PredictionPoint[];
+  nextDayPoint: PredictionPoint | null;
   summary: PredictionSummary;
-  reportPreview: string;
+  reportPreview: string | null;
   generatedAt: string;
 }
 

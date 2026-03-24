@@ -1,56 +1,72 @@
-<template>
+﻿<template>
   <section class="card form-card">
     <div class="field-grid">
       <label class="field">
-        <span>预测目标</span>
-        <select v-model="target">
-          <option value="USD/CNY">USD/CNY</option>
-          <option value="EUR/CNY">EUR/CNY</option>
-          <option value="JPY/CNY">JPY/CNY</option>
-          <option value="WTI">WTI</option>
+        <span>{{ targetLabel }}</span>
+        <select v-model="target" :disabled="targetOptions.length === 1">
+          <option v-for="option in targetOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
         </select>
       </label>
 
       <label class="field">
-        <span>时间跨度</span>
-        <select v-model="horizon">
-          <option value="1d">1d</option>
-          <option value="7d">7d</option>
-          <option value="30d">30d</option>
-        </select>
+        <span>预测口径</span>
+        <input :value="fixedHorizonLabel" type="text" readonly />
       </label>
     </div>
 
     <div class="algo-row">
       <div class="chip-wrap">
-        <span class="chip">Model: ForecastModel-V1</span>
-        <span class="chip">Algorithm: CEEMDAN</span>
-        <span class="chip">Algorithm: LightGBM+TFT</span>
+        <span v-for="chip in chips" :key="chip" class="chip">{{ chip }}</span>
       </div>
       <button class="run-btn" type="button" :disabled="loading" @click="onRun">
-        {{ loading ? "运行中..." : "运行预测" }}
+        {{ loading ? "运行中..." : submitText }}
       </button>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import type { SelectOption } from "@/types/common";
 
-const props = defineProps<{
-  loading: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    loading: boolean;
+    targetOptions: SelectOption[];
+    defaultTarget?: string;
+    fixedHorizonLabel?: string;
+    submitText?: string;
+    targetLabel?: string;
+    chips?: string[];
+  }>(),
+  {
+    defaultTarget: "",
+    fixedHorizonLabel: "Next-day / 1d",
+    submitText: "运行预测",
+    targetLabel: "预测目标",
+    chips: () => ["Display: next-day single point"]
+  }
+);
 
 const emit = defineEmits<{
   run: [{ target: string; horizon: string }];
 }>();
 
-const target = ref("USD/CNY");
-const horizon = ref("7d");
+const target = ref("");
+
+watch(
+  () => [props.defaultTarget, props.targetOptions] as const,
+  ([defaultTarget, options]) => {
+    target.value = defaultTarget || options[0]?.value || "";
+  },
+  { immediate: true, deep: true }
+);
 
 function onRun(): void {
-  if (props.loading) return;
-  emit("run", { target: target.value, horizon: horizon.value });
+  if (props.loading || !target.value) return;
+  emit("run", { target: target.value, horizon: "1d" });
 }
 </script>
 
@@ -73,12 +89,17 @@ function onRun(): void {
   font-size: 13px;
 }
 
-select {
+select,
+input {
   border-radius: 10px;
   border: 1px solid rgba(122, 155, 255, 0.42);
   background: rgba(5, 10, 24, 0.9);
   color: var(--color-text-primary);
   padding: 10px;
+}
+
+input[readonly] {
+  cursor: default;
 }
 
 .algo-row {

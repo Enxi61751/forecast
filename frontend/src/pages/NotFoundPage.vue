@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="card not-found">
     <h1>页面不存在</h1>
     <p>请从顶部导航返回可用页面。</p>

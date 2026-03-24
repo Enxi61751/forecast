@@ -1,12 +1,19 @@
-<template>
+﻿<template>
   <section class="section-grid">
-    <h1 class="page-title">实时原油价格</h1>
-    <p class="page-subtitle">点击卡片查看不同时间范围的趋势详情。</p>
+    <h1 class="page-title">市场行情</h1>
+
+
+    <section class="card market-note">
+      <div>
+        <h3>这里是市场浏览，不是预测入口</h3>
+      </div>
+      <RouterLink class="market-link" to="/oil-forecast">前往原油预测</RouterLink>
+    </section>
 
     <AsyncState
       :status="status"
       :error-message="errorMessage"
-      empty-text="暂无原油价格数据"
+      empty-text="暂无原油市场数据"
       show-retry
       @retry="loadRates"
     >
@@ -31,6 +38,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { RouterLink } from "vue-router";
 import AsyncState from "@/components/common/AsyncState.vue";
 import ExchangeRateCard from "@/components/exchange/ExchangeRateCard.vue";
 import ExchangeDetailModal from "@/components/exchange/ExchangeDetailModal.vue";
@@ -39,7 +47,7 @@ import type { LoadStatus } from "@/types/common";
 import type { ExchangeRateCardData, ExchangeTimeRange } from "@/types/exchange";
 
 const status = ref<LoadStatus>("loading");
-const errorMessage = ref("获取原油价格数据失败");
+const errorMessage = ref("获取市场数据失败");
 const rates = ref<ExchangeRateCardData[]>([]);
 const selected = ref<ExchangeRateCardData | null>(null);
 const showModal = ref(false);
@@ -64,12 +72,12 @@ function buildTrend(baseRate: number): Record<ExchangeTimeRange, number[]> {
     ],
     "1M": [
       Number((baseRate - 0.15).toFixed(2)),
-      Number((baseRate - 0.10).toFixed(2)),
+      Number((baseRate - 0.1).toFixed(2)),
       Number((baseRate - 0.05).toFixed(2)),
       Number(baseRate.toFixed(2))
     ],
     "6M": [
-      Number((baseRate - 0.30).toFixed(2)),
+      Number((baseRate - 0.3).toFixed(2)),
       Number((baseRate - 0.22).toFixed(2)),
       Number((baseRate - 0.12).toFixed(2)),
       Number((baseRate - 0.06).toFixed(2)),
@@ -102,7 +110,7 @@ async function loadRates(): Promise<void> {
       return {
         id: `oil-${index}`,
         pair: "WTI/USD",
-        name: "原油价格",
+        name: "WTI 市场价格",
         price: item.rate,
         change,
         high: Math.max(...latestWeek),
@@ -116,7 +124,7 @@ async function loadRates(): Promise<void> {
     status.value = rates.value.length ? "success" : "empty";
   } catch (error) {
     console.error(error);
-    errorMessage.value = error instanceof Error ? error.message : "获取原油价格数据失败";
+    errorMessage.value = error instanceof Error ? error.message : "获取市场数据失败";
     status.value = "error";
   }
 }
@@ -127,6 +135,30 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.market-note {
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.market-note p {
+  margin: 0 0 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.market-note h3 {
+  margin: 0;
+}
+
+.market-link {
+  color: #8ab7ff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .rate-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -136,6 +168,13 @@ onMounted(() => {
 @media (max-width: 1000px) {
   .rate-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .market-note {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

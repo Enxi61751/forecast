@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <section class="section-grid">
-    <h1 class="page-title">新闻与情绪 / 事件</h1>
-    <p class="page-subtitle">展示近期新闻、情绪变化与关键事件信息。</p>
+    <h1 class="page-title">新闻与事件</h1>
+    <p class="page-subtitle">展示近期新闻、情绪变化与关键事件时间线，为预测与解释模块提供上下文。</p>
 
     <AsyncState
       :status="status"

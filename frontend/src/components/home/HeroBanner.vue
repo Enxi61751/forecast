@@ -1,11 +1,12 @@
-<template>
+﻿<template>
   <section class="card hero-wrap">
     <div class="hero-glow" />
     <div class="hero-text">
       <p class="kicker">Financial Risk Intelligence</p>
-      <h1>金融风险预测与解释系统</h1>
+      <h1>金融风险预测与解释展示平台</h1>
       <p>
-        聚合新闻情绪、极端事件、时间序列分解与预测模型输出，提供可追踪的风险洞察与报告展示。
+        聚合新闻情绪、极端事件、市场行情、预测结果和多智能体解释输出，
+        为当前项目提供可展示、可扩展、可继续对接后端的前端承接层。
       </p>
     </div>
   </section>

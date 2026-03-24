@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="card status-card">
     <header class="status-head">
       <h3>运行状态</h3>

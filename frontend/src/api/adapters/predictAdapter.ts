@@ -1,4 +1,4 @@
-import type { PredictionPoint, PredictionResult, PredictionRunRequest } from "@/types/predict";
+﻿import type { PredictionPoint, PredictionResult, PredictionRunRequest } from "@/types/predict";
 
 // TODO: align these raw fields with finalized FastAPI response schema.
 export interface PredictRunRawResponse {
@@ -19,6 +19,7 @@ interface PredictionSummaryRaw {
   trend?: unknown;
   risk?: unknown;
   confidence?: unknown;
+  explanation?: unknown;
 }
 
 function toFiniteNumber(value: unknown, fallback = 0): number {
@@ -50,8 +51,8 @@ function normalizeSeries(raw: unknown): PredictionPoint[] {
       if (typeof item === "object" && item !== null) {
         const row = item as Record<string, unknown>;
         return {
-          time: toText(row.time, `D+${index + 1}`),
-          value: toFiniteNumber(row.value)
+          time: toText(row.time ?? row.date ?? row.label, `D+${index + 1}`),
+          value: toFiniteNumber(row.value ?? row.price ?? row.prediction)
         };
       }
 
@@ -68,8 +69,9 @@ function adaptSummary(raw: unknown): PredictionResult["summary"] {
 
   return {
     trend: toText(row.trend, "Trend pending backend final schema"),
-    risk: toText(row.risk, "Risk description pending backend final schema"),
-    confidence: toFiniteNumber(row.confidence, 0.8)
+    risk: typeof row.risk === "undefined" || row.risk === null ? null : toText(row.risk, ""),
+    confidence: typeof row.confidence === "undefined" || row.confidence === null ? null : toFiniteNumber(row.confidence, 0),
+    explanation: typeof row.explanation === "undefined" || row.explanation === null ? null : toText(row.explanation, "")
   };
 }
 
@@ -86,16 +88,14 @@ function withFallbackBand(forecast: PredictionPoint[], band: unknown, ratio: num
 }
 
 export function adaptPredictionResult(raw: PredictRunRawResponse, req: PredictionRunRequest): PredictionResult {
-  const forecast = normalizeSeries(raw.forecast);
+  const forecast = normalizeSeries(raw.forecast ?? ((raw as Record<string, unknown>).result ?? null));
   const fallbackForecast = forecast.length
     ? forecast
-    : [
-        { time: "D+1", value: 0 },
-        { time: "D+2", value: 0 }
-      ];
+    : [{ time: "D+1", value: 0 }];
 
   const summary = adaptSummary(raw.summary);
-  const explainText = typeof raw.explain === "string" ? raw.explain : "Explanation is pending backend final schema.";
+  const explainText = typeof raw.explain === "string" && raw.explain.trim() ? raw.explain : summary.explanation;
+  const nextDayPoint = fallbackForecast[0] ?? null;
 
   return {
     runId: String(raw.runId ?? `real-run-${Date.now()}`),
@@ -104,8 +104,9 @@ export function adaptPredictionResult(raw: PredictRunRawResponse, req: Predictio
     forecast: fallbackForecast,
     lowerBound: withFallbackBand(fallbackForecast, raw.lowerBound, 0.992),
     upperBound: withFallbackBand(fallbackForecast, raw.upperBound, 1.008),
+    nextDayPoint,
     summary,
-    reportPreview: explainText,
+    reportPreview: explainText ?? null,
     generatedAt: toText(raw.generatedAt, new Date().toISOString())
   };
 }

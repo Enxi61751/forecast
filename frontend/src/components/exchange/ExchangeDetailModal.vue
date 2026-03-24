@@ -1,10 +1,12 @@
-<template>
+﻿<template>
   <div v-if="modelValue && selected" class="mask" @click.self="$emit('update:modelValue', false)">
     <section class="card modal">
       <header class="modal-head">
         <h3>{{ selected.name }}详情</h3>
         <button class="close" type="button" @click="$emit('update:modelValue', false)">关闭</button>
       </header>
+
+      <p class="modal-tip">这里展示的是市场浏览维度的多时间范围走势，不代表预测区间。</p>
 
       <div class="range-switch">
         <button
@@ -19,7 +21,7 @@
         </button>
       </div>
 
-      <ChartPanel title="原油价格趋势" :labels="selected.labels[range]" :values="selected.trend[range]" :height="280" :enable-zoom="true" />
+      <ChartPanel title="WTI Market Trend" :labels="selected.labels[range]" :values="selected.trend[range]" :height="280" :enable-zoom="true" />
     </section>
   </div>
 </template>
@@ -68,6 +70,12 @@ defineEmits<{
 
 .modal-head h3 {
   margin: 0;
+}
+
+.modal-tip {
+  margin: 0 0 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .close {

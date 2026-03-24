@@ -1,14 +1,15 @@
 ﻿<template>
   <section class="section-grid">
-    <h1 class="page-title">汇率预测</h1>
+    <h1 class="page-title">原油价格预测</h1>
+
 
     <PredictControlForm
       :loading="isRunning"
       :target-options="targetOptions"
       :default-target="targetOptions[0].value"
       fixed-horizon-label="Next-day / 1d"
-      submit-text="运行汇率预测"
-      :chips="['Scope: Exchange', 'Display: next-day single point', 'Current branch: existing predict API']"
+      submit-text="运行原油预测"
+      :chips="['Target: WTI futures', 'Model chain: TFT', 'Display: next-day single point']"
       @run="onRun"
     />
 
@@ -21,17 +22,18 @@
 
     <AsyncState
       :status="resultStatus"
-      loading-text="正在运行汇率预测任务..."
-      empty-text="请选择币种后运行 next-day 单点预测。"
+      loading-text="正在运行原油预测任务..."
+      empty-text="请运行 WTI next-day 单点预测。"
       :error-message="runState.error || defaultError"
+      unavailable-text="原油预测页面已就绪，扩展字段将随接口完善逐步接入。"
       show-retry
       @retry="rerun"
     >
       <section class="snapshot-grid">
         <article class="card snapshot-card">
-          <p>当前关注品种</p>
-          <h3>{{ prediction?.target || '--' }}</h3>
-          <span>Forecast scope: FX next-day</span>
+          <p>当前/最近市场信息</p>
+          <h3>查看市场行情页</h3>
+          <RouterLink class="snapshot-link" to="/exchange">前往市场行情</RouterLink>
         </article>
         <article class="card snapshot-card">
           <p>next-day prediction</p>
@@ -41,12 +43,12 @@
         <article class="card snapshot-card">
           <p>生成时间</p>
           <h3>{{ generatedAtText }}</h3>
-          <span>Current branch keeps existing predict API.</span>
+          <span>Target: {{ prediction?.target || "WTI" }}</span>
         </article>
       </section>
 
       <ChartPanel
-        title="FX Next-day Prediction"
+        title="WTI Next-day Prediction"
         :labels="resultLabels"
         :values="resultValues"
         :height="280"
@@ -74,6 +76,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { RouterLink } from "vue-router";
 import AsyncState from "@/components/common/AsyncState.vue";
 import ChartPanel from "@/components/common/ChartPanel.vue";
 import ReportPanel from "@/components/common/ReportPanel.vue";
@@ -85,12 +88,10 @@ import type { LoadStatus, SelectOption } from "@/types/common";
 import type { PredictionResult, PredictionRunState } from "@/types/predict";
 
 const targetOptions: SelectOption[] = [
-  { label: "USD/CNY", value: "USD/CNY" },
-  { label: "EUR/CNY", value: "EUR/CNY" },
-  { label: "JPY/CNY", value: "JPY/CNY" }
+  { label: "WTI", value: "WTI" }
 ];
 
-const defaultError = "汇率预测任务失败";
+const defaultError = "原油预测任务失败";
 
 const runState = ref<PredictionRunState>({
   phase: "idle",
@@ -105,8 +106,10 @@ const reportContent = ref("");
 const lastParams = ref<{ target: string; horizon: string } | null>(null);
 
 const isRunning = computed(() => runState.value.phase === "running");
+const pageReady = computed(() => targetOptions.length > 0);
 
 const resultStatus = computed<LoadStatus>(() => {
+  if (!pageReady.value) return "unavailable";
   if (runState.value.phase === "running") return "loading";
   if (runState.value.phase === "success") return "success";
   if (runState.value.phase === "error") return "error";
@@ -141,7 +144,7 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
     phase: "running",
     runId: null,
     progress: 15,
-    message: "正在提交汇率预测任务",
+    message: "正在提交原油预测任务",
     error: null
   };
 
@@ -168,7 +171,7 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
       phase: "success",
       runId: result.runId,
       progress: 100,
-      message: "汇率预测完成",
+      message: "原油预测完成",
       error: null
     };
   } catch (error) {
@@ -177,7 +180,7 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
       phase: "error",
       runId: runState.value.runId,
       progress: 100,
-      message: "汇率预测流程失败",
+      message: "原油预测流程失败",
       error: error instanceof Error ? error.message : defaultError
     };
   }
@@ -205,7 +208,7 @@ function downloadReport(): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `fx-forecast-report-${runState.value.runId || Date.now()}.txt`;
+  anchor.download = `oil-forecast-report-${runState.value.runId || Date.now()}.txt`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
@@ -236,6 +239,11 @@ function downloadReport(): void {
 .snapshot-card h3 {
   margin: 0;
   font-size: 22px;
+}
+
+.snapshot-link {
+  color: #8ab7ff;
+  text-decoration: none;
 }
 
 .run-tip {

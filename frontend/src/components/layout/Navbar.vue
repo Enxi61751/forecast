@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <header class="nav-wrap">
     <div class="nav-inner">
       <RouterLink class="brand" to="/">RiskSight</RouterLink>
@@ -16,10 +16,13 @@ import { RouterLink } from "vue-router";
 
 const navItems = [
   { to: "/", label: "首页" },
-  { to: "/exchange", label: "实时原油价格" },
-  { to: "/forecast", label: "原油价格预测" },
-  { to: "/news-events", label: "新闻与事件" },
-  { to: "/explainability", label: "可解释性分析" }
+  { to: "/exchange", label: "市场行情" },
+  { to: "/forecast", label: "汇率预测" },
+  { to: "/oil-forecast", label: "原油预测" },
+  { to: "/agent-interaction", label: "智能体交互" },
+  { to: "/backtest", label: "策略回测" },
+  { to: "/news-events", label: "新闻事件" },
+  { to: "/explainability", label: "可解释性" }
 ];
 </script>
 

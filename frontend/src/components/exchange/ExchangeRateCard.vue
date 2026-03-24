@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <button class="card rate-card" type="button" @click="$emit('open', data)">
     <div class="top-row">
       <h3>{{ data.pair }}</h3>

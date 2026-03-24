@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <section class="section-grid">
     <h1 class="page-title">可解释性分析</h1>
-    <p class="page-subtitle">当前展示占位图结构，后续可替换为真实模型输出。</p>
+    <p class="page-subtitle">当前展示的是前端承接层占位图，后续可替换为真实模型解释结果。</p>
 
     <section class="card controls">
       <label>

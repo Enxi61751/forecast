@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="card report-card">
     <header class="report-head">
       <h3>{{ title }}</h3>
@@ -8,7 +8,7 @@
     </header>
     <div class="report-content">
       <p v-if="content">{{ content }}</p>
-      <p v-else class="placeholder">尚未生成报告，请先运行预测。</p>
+      <p v-else class="placeholder">暂未生成内容，请先运行预测或等待接口可用。</p>
     </div>
   </section>
 </template>

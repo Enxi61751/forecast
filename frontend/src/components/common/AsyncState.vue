@@ -1,7 +1,10 @@
-<template>
+﻿<template>
   <div v-if="status === 'loading'" class="state-box loading">
     <div class="pulse" />
     <p>{{ loadingText }}</p>
+  </div>
+  <div v-else-if="status === 'unavailable'" class="state-box unavailable">
+    <p>{{ unavailableText }}</p>
   </div>
   <div v-else-if="status === 'empty'" class="state-box empty">
     <p>{{ emptyText }}</p>
@@ -23,12 +26,14 @@ const props = withDefaults(
     loadingText?: string;
     emptyText?: string;
     errorMessage?: string;
+    unavailableText?: string;
     showRetry?: boolean;
   }>(),
   {
     loadingText: "加载中...",
     emptyText: "暂无数据",
     errorMessage: "加载失败，请稍后重试",
+    unavailableText: "当前分支暂未接入该接口，请等待后端合并。",
     showRetry: false
   }
 );
@@ -52,6 +57,13 @@ const errorText = computed(() => props.errorMessage || "加载失败，请稍后
   justify-content: center;
   gap: 12px;
   color: var(--color-text-secondary);
+}
+
+.unavailable {
+  border-style: solid;
+  border-color: rgba(255, 214, 102, 0.32);
+  background: rgba(58, 46, 10, 0.3);
+  color: #f3dfa2;
 }
 
 .pulse {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <RouterLink :to="to" class="card entry-card">
     <h3>{{ title }}</h3>
     <p>{{ description }}</p>

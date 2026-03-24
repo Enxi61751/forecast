@@ -1,4 +1,4 @@
-export type LoadStatus = "idle" | "loading" | "success" | "empty" | "error";
+export type LoadStatus = "idle" | "loading" | "success" | "empty" | "error" | "unavailable";
 
 export interface ApiResponseEnvelope<T> {
   code: number;

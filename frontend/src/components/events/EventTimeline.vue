@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <section class="card timeline-card">
     <header>
-      <h3>极端事件时间线</h3>
+      <h3>关键事件时间线</h3>
     </header>
 
     <ol>

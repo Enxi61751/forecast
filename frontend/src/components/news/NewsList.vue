@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="card list-card">
     <header>
       <h3>近期新闻</h3>

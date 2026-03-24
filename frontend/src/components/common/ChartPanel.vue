@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <section class="card chart-panel">
     <header class="panel-head">
       <h3>{{ title }}</h3>
@@ -32,6 +32,11 @@
         </g>
       </svg>
 
+      <div v-else-if="points.length === 1" class="single-point">
+        <span class="single-label">{{ points[0].label }}</span>
+        <strong>{{ formatValue(points[0].value) }}</strong>
+      </div>
+
       <div v-else class="chart-empty">暂无图表数据</div>
 
       <div v-if="hoverPoint" class="chart-tooltip" :style="tooltipStyle">
@@ -40,7 +45,7 @@
       </div>
     </div>
 
-    <div class="labels" v-if="displayLabels.length">
+    <div v-if="displayLabels.length" class="labels">
       <span v-for="(label, index) in displayLabels" :key="`${label}-${index}`">{{ label }}</span>
     </div>
 
@@ -138,7 +143,7 @@ const points = computed<ChartPoint[]>(() => {
   const span = max - min || 1;
 
   return values.map((value, index) => ({
-    x: (index / Math.max(values.length - 1, 1)) * 100,
+    x: values.length === 1 ? 50 : (index / Math.max(values.length - 1, 1)) * 100,
     y: 100 - ((value - min) / span) * 80 - 10,
     label: displayLabels.value[index] ?? `P${index + 1}`,
     value
@@ -267,6 +272,25 @@ svg {
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
+}
+
+.single-point {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.single-point strong {
+  font-size: 28px;
+  color: #d8e6ff;
+}
+
+.single-label {
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .labels {
