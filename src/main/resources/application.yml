@@ -32,6 +32,11 @@ app:
   cache:
     ttl-seconds: 120
 
+  # 外部 API 代理（如油价 API 需要代理才能访问，填写代理地址；不需要则留空）
+  proxy:
+    host: ""      # 例：172.29.0.1，留空则直连
+    port: 7897
+
   oilprice:
     api:
       url: https://api.oilpriceapi.com/v1/prices/latest
