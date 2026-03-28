@@ -27,3 +27,13 @@ export interface BacktestApiResult {
   message: string;
   data: BacktestSummary | null;
 }
+
+// Strategy comparison table row
+export interface StrategyComparisonRow {
+  strategyName: string;
+  tradeCount: number;
+  winRate: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  oosMaxDrawdown: number;
+}
