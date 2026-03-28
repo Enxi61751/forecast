@@ -17,7 +17,7 @@ import { RouterLink } from "vue-router";
 const navItems = [
   { to: "/", label: "首页" },
   { to: "/exchange", label: "市场行情" },
-  { to: "/forecast", label: "汇率预测" },
+  { to: "/forecast", label: "汇率查询" },
   { to: "/oil-forecast", label: "原油预测" },
   { to: "/agent-interaction", label: "智能体交互" },
   { to: "/backtest", label: "策略回测" },

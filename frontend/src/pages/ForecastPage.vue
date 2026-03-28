@@ -1,13 +1,13 @@
 ﻿<template>
   <section class="section-grid">
-    <h1 class="page-title">汇率预测</h1>
+    <h1 class="page-title">汇率查询</h1>
 
     <PredictControlForm
       :loading="isRunning"
       :target-options="targetOptions"
       :default-target="targetOptions[0].value"
       fixed-horizon-label="Next-day / 1d"
-      submit-text="运行汇率预测"
+      submit-text="运行汇率查询"
       :chips="['Scope: Exchange', 'Display: next-day single point', 'Current branch: existing predict API']"
       @run="onRun"
     />
@@ -21,8 +21,8 @@
 
     <AsyncState
       :status="resultStatus"
-      loading-text="正在运行汇率预测任务..."
-      empty-text="请选择币种后运行 next-day 单点预测。"
+      loading-text="正在运行汇率查询任务..."
+      empty-text="请选择币种后运行 next-day 单点查询。"
       :error-message="runState.error || defaultError"
       show-retry
       @retry="rerun"
@@ -90,7 +90,7 @@ const targetOptions: SelectOption[] = [
   { label: "JPY/CNY", value: "JPY/CNY" }
 ];
 
-const defaultError = "汇率预测任务失败";
+const defaultError = "汇率查询任务失败";
 
 const runState = ref<PredictionRunState>({
   phase: "idle",
@@ -141,7 +141,7 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
     phase: "running",
     runId: null,
     progress: 15,
-    message: "正在提交汇率预测任务",
+    message: "正在提交汇率查询任务",
     error: null
   };
 
@@ -167,8 +167,8 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
     runState.value = {
       phase: "success",
       runId: result.runId,
-      progress: 100,
-      message: "汇率预测完成",
+        progress: 100,
+        message: "汇率查询完成",
       error: null
     };
   } catch (error) {
@@ -177,7 +177,7 @@ async function onRun(params: { target: string; horizon: string }): Promise<void>
       phase: "error",
       runId: runState.value.runId,
       progress: 100,
-      message: "汇率预测流程失败",
+      message: "汇率查询流程失败",
       error: error instanceof Error ? error.message : defaultError
     };
   }

@@ -21,7 +21,7 @@ import type { LoadStatus } from "@/types/common";
 
 const entries = [
   { to: "/exchange", title: "市场行情", description: "查看当前和近期的 WTI 市场浏览信息，包含卡片概览与多时间范围走势详情。" },
-  { to: "/forecast", title: "汇率预测", description: "收敛为汇率 next-day 单点预测展示，保留当前预测主页面的布局与状态区。" },
+  { to: "/forecast", title: "汇率查询", description: "收敛为汇率 next-day 单点预测展示，保留当前预测主页面的布局与状态区。" },
   { to: "/oil-forecast", title: "原油预测", description: "新增 WTI 原油 next-day 单点预测页面，复用现有预测样式体系并预留解释位。" },
   { to: "/agent-interaction", title: "智能体交互", description: "承接 stagex2 多智能体的日报式输出，用消息流视觉展示各 agent 的观点与理由。" },
   { to: "/backtest", title: "策略回测", description: "新增策略回测展示页，预留收益曲线、风险指标、交易摘要和阶段总结位置。" },
