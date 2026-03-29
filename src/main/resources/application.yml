@@ -24,6 +24,9 @@ spring:
       repositories:
         enabled: false
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
 app:
   model-service:
     base-url: http://localhost:8000  # model-remote FastAPI (predict + sentiment)
@@ -44,3 +47,9 @@ app:
   llm:
     api-key: YOUR_LLM_API_KEY
     url: https://api.deepseek.com/chat/completions
+
+stage2:
+  base-url: http://localhost:8002
+
+
+  
