@@ -10,6 +10,8 @@ export interface AgentFeedItem {
   remark: string | null;
   updatedAt: string | null;
   tags: string[];
+  rawDecisionJson?: Record<string, unknown>;
+  parameterCorrection?: Record<string, unknown>;
 }
 
 export interface AgentFeedSection {
@@ -29,4 +31,16 @@ export interface AgentApiResult {
   available: boolean;
   message: string;
   data: AgentPageState | null;
+}
+
+export interface SimulationRequest {
+  mode: "market_simulation" | "parameter_iteration";
+  iterationParams?: Record<string, unknown>;
+}
+
+export interface SimulationResponse {
+  overallSummary: string;
+  agentDecisions: Record<string, Record<string, unknown>>;
+  parameterCorrection: Record<string, unknown>;
+  agentFeedItems?: AgentFeedItem[];
 }

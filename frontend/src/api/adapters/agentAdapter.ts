@@ -1,4 +1,4 @@
-import type { AgentFeedItem, AgentFeedSection, AgentPageState } from "@/types/agent";
+import type { AgentFeedItem, AgentFeedSection, AgentPageState, SimulationResponse } from "@/types/agent";
 
 // TODO: align these raw fields with the finalized agent daily-report response.
 export interface AgentFeedRawItem {
@@ -15,6 +15,8 @@ export interface AgentFeedRawItem {
   remark?: unknown;
   updatedAt?: unknown;
   tags?: unknown;
+  rawDecisionJson?: unknown;
+  parameterCorrection?: unknown;
 }
 
 export interface AgentFeedRawResponse {
@@ -50,7 +52,29 @@ function toTags(value: unknown): string[] {
   return value.map((item) => toText(item)).filter((item): item is string => Boolean(item));
 }
 
-function adaptItem(raw: AgentFeedRawItem, index: number): AgentFeedItem {
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return { ...(value as Record<string, unknown>) };
+}
+
+function toDecisionMap(value: unknown): Record<string, Record<string, unknown>> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.entries(value as Record<string, unknown>).reduce<Record<string, Record<string, unknown>>>((result, [key, decision]) => {
+    const normalizedDecision = toRecord(decision);
+    if (normalizedDecision) {
+      result[key] = normalizedDecision;
+    }
+    return result;
+  }, {});
+}
+
+function mapAgentFeedItem(raw: AgentFeedRawItem, index: number): AgentFeedItem {
   return {
     id: String(raw.id ?? `agent-${index}`),
     agentName: toText(raw.agentName) ?? toText(raw.name) ?? `Agent ${index + 1}`,
@@ -62,7 +86,9 @@ function adaptItem(raw: AgentFeedRawItem, index: number): AgentFeedItem {
     memory: toText(raw.memory),
     remark: toText(raw.remark) ?? toText(raw.note),
     updatedAt: toText(raw.updatedAt),
-    tags: toTags(raw.tags)
+    tags: toTags(raw.tags),
+    rawDecisionJson: toRecord(raw.rawDecisionJson) ?? {},
+    parameterCorrection: toRecord(raw.parameterCorrection)
   };
 }
 
@@ -81,7 +107,7 @@ function adaptSections(raw: AgentFeedRawResponse): AgentFeedSection[] {
           id: String(row.id ?? `section-${index}`),
           title: toText(row.title) ?? `Section ${index + 1}`,
           items: items
-            .map((item, itemIndex) => (typeof item === "object" && item !== null ? adaptItem(item as AgentFeedRawItem, itemIndex) : null))
+            .map((item, itemIndex) => (typeof item === "object" && item !== null ? mapAgentFeedItem(item as AgentFeedRawItem, itemIndex) : null))
             .filter((item): item is AgentFeedItem => Boolean(item))
         };
       })
@@ -98,7 +124,7 @@ function adaptSections(raw: AgentFeedRawResponse): AgentFeedSection[] {
       id: "daily-feed",
       title: "Daily Agent Feed",
       items: source
-        .map((item, index) => (typeof item === "object" && item !== null ? adaptItem(item as AgentFeedRawItem, index) : null))
+        .map((item, index) => (typeof item === "object" && item !== null ? mapAgentFeedItem(item as AgentFeedRawItem, index) : null))
         .filter((item): item is AgentFeedItem => Boolean(item))
     }
   ];
@@ -110,5 +136,14 @@ export function adaptAgentFeed(raw: AgentFeedRawResponse): AgentPageState {
     sections: adaptSections(raw),
     reportTitle: toText(raw.reportTitle),
     reportBody: toText(raw.reportBody)
+  };
+}
+
+export function adaptSimulationResponse(raw: SimulationResponse) {
+  return {
+    summary: toText(raw.overallSummary) ?? "",
+    decisions: toDecisionMap(raw.agentDecisions),
+    correctionParams: toRecord(raw.parameterCorrection) ?? {},
+    feedItems: (raw.agentFeedItems ?? []).map((item, index) => mapAgentFeedItem(item, index))
   };
 }

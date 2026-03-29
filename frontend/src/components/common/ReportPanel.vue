@@ -8,17 +8,23 @@
     </header>
     <div class="report-content">
       <p v-if="content">{{ content }}</p>
-      <p v-else class="placeholder">暂未生成内容，请先运行预测或等待接口可用。</p>
+      <p v-else class="placeholder">{{ placeholder }}</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  title: string;
-  content: string;
-  canDownload: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    title: string;
+    content: string;
+    canDownload: boolean;
+    placeholder?: string;
+  }>(),
+  {
+    placeholder: "暂未生成内容，请先运行预测或等待接口可用。"
+  }
+);
 
 defineEmits<{
   download: [];
