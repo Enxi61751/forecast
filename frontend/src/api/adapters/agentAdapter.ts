@@ -1,5 +1,4 @@
-import type { AgentFeedItem, AgentFeedSection, AgentPageState, SimulationResponse } from "@/types/agent";
-
+import type { AgentFeedItem, AgentFeedSection, AgentPageState } from "@/types/agent";
 // TODO: align these raw fields with the finalized agent daily-report response.
 export interface AgentFeedRawItem {
   id?: unknown;
@@ -139,11 +138,65 @@ export function adaptAgentFeed(raw: AgentFeedRawResponse): AgentPageState {
   };
 }
 
-export function adaptSimulationResponse(raw: SimulationResponse) {
+export function adaptSimulationResponse(raw: Record<string, unknown>) {
+  const actions = Array.isArray(raw["agent_actions"]) ? raw["agent_actions"] : [];
+  const orders = Array.isArray(raw["submitted_orders"]) ? raw["submitted_orders"] : [];
+
+  const summary = actions.length
+    ? actions
+        .map((item, index) => {
+          const row =
+            typeof item === "object" && item !== null
+              ? (item as Record<string, unknown>)
+              : {};
+          return `Agent ${index + 1}: ${toText(row["rationale"]) ?? "暂无说明"}`;
+        })
+        .join("\n\n")
+    : "当前没有智能体动作输出。";
+
+  const feedItems = actions.map((item, index) => {
+    const row =
+      typeof item === "object" && item !== null
+        ? (item as Record<string, unknown>)
+        : {};
+
+    return mapAgentFeedItem(
+      {
+        id: `agent-action-${index}`,
+        agentName: `Agent ${index + 1}`,
+        role: toText(row["instrument_pref"]) ?? "Unknown role",
+        direction: typeof row["direction"] === "number" ? String(row["direction"]) : row["direction"],
+        riskAttitude:
+          typeof row["aggressiveness"] === "number"
+            ? String(row["aggressiveness"])
+            : undefined,
+        rationale: toText(row["rationale"]) ?? undefined,
+        confidence: row["confidence"],
+        memory: toText(row["memory_to_save"]) ?? undefined,
+        remark:
+          typeof row["is_risk_triggered"] === "boolean"
+            ? row["is_risk_triggered"]
+              ? "已触发风控"
+              : "未触发风控"
+            : undefined,
+        updatedAt: undefined,
+        tags: [toText(row["instrument_pref"]), toText(row["horizon"])].filter(
+          (v): v is string => Boolean(v)
+        ),
+        rawDecisionJson: row,
+        parameterCorrection: undefined
+      },
+      index
+    );
+  });
+
   return {
-    summary: toText(raw.overallSummary) ?? "",
-    decisions: toDecisionMap(raw.agentDecisions),
-    correctionParams: toRecord(raw.parameterCorrection) ?? {},
-    feedItems: (raw.agentFeedItems ?? []).map((item, index) => mapAgentFeedItem(item, index))
+    summary,
+    decisions: {
+      agent_actions: actions,
+      submitted_orders: orders
+    },
+    correctionParams: {},
+    feedItems
   };
 }
