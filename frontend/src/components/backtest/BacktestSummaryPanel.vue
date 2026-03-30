@@ -31,7 +31,7 @@
       </article>
       <article class="summary-block">
         <h4>Notes</h4>
-        <p>{{ notes || "可在后端接口合并后补充策略说明和附加解释。" }}</p>
+        <p>{{ notes || "根据预测价格基于AND/VETO/ModelOnly策略进行回测" }}</p>
       </article>
     </div>
     <StrategyComparisonTable v-if="showComparison" :rows="comparisonData" />
