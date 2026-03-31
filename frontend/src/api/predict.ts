@@ -67,7 +67,7 @@ export function runPrediction(payload: PredictRequest) {
     path: "/api/predict",
     init: {
       method: "POST",
-      body: JSON.stringify(payload)
+      body: JSON.stringify(request)
     },
     mapReal: (data) => adaptPredictionResult(data, request),
     mocker: async () => adaptPredictionResult(buildMockRawResponse(request), request)
