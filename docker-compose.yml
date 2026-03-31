@@ -29,7 +29,8 @@ services:
   # ── Agent Service (agent branch, port 8001) ──────────────────────────
   agent-service:
     build:
-      context: ./agent-src/agent-service
+      context: .
+      dockerfile: deploy/agent/Dockerfile
     restart: always
     environment:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
