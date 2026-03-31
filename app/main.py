@@ -17,7 +17,43 @@ from app.schemas import (
     TimePoint,
 )
 
+<<<<<<< HEAD
 app = FastAPI(title="CitiCup Model Service", version="0.1.0")
+=======
+
+import os
+from datetime import datetime, timezone, timedelta
+from typing import List, Optional, Any
+
+import numpy as np
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from pydantic import BaseModel, Field
+app = FastAPI(title="CitiCup Model Service", version="0.1.0")
+def _to_jsonable(obj):
+    if obj is None:
+        return None
+
+    if isinstance(obj, dict):
+        return {str(k): _to_jsonable(v) for k, v in obj.items()}
+
+    if isinstance(obj, (list, tuple)):
+        return [_to_jsonable(v) for v in obj]
+
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+
+    return obj
+>>>>>>> c3c3a7b (save local files)
 pipe = PredictPipeline()
 
 
@@ -41,7 +77,11 @@ class ExtremeEventDto(BaseModel):
 class SentimentResponseDto(BaseModel):
     sentiment: float
     confidence: float
+<<<<<<< HEAD
     extremeEvents: List[ExtremeEventDto] = []
+=======
+    extremeEvents: List[ExtremeEventDto] = Field(default_factory=list)
+>>>>>>> c3c3a7b (save local files)
 
 
 def _keyword_sentiment(text: str) -> float:
@@ -185,6 +225,12 @@ def predict(req: PredictRequest):
             lower_series.append(TimePoint(t=t_k, v=float(lo)))
             upper_series.append(TimePoint(t=t_k, v=float(hi)))
 
+<<<<<<< HEAD
+=======
+        raw = _to_jsonable(raw)
+        explain = _to_jsonable(explain)
+
+>>>>>>> c3c3a7b (save local files)
         forecast = Forecast(
             point=point_series,
             lower=lower_series,
