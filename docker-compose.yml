@@ -1,27 +1,4 @@
 services:
-  # ── MySQL ──────────────────────────────────────────────
-  mysql:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_DATABASE: citicup
-      MYSQL_USER: ${MYSQL_USER:-citicup_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./db/migration:/docker-entrypoint-initdb.d
-    command: --innodb-buffer-pool-size=128M --max-connections=50
-    deploy:
-      resources:
-        limits:
-          memory: 400m
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # ── Redis ──────────────────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -74,7 +51,7 @@ services:
     restart: always
     environment:
       JAVA_OPTS: "-Xms256m -Xmx512m"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/citicup?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/citicup?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-citicup_user}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
@@ -88,14 +65,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      model-service:
-        condition: service_started
-      agent-service:
-        condition: service_started
+      - redis
+      - model-service
+      - agent-service
     deploy:
       resources:
         limits:
@@ -115,5 +87,4 @@ services:
       - backend
 
 volumes:
-  mysql_data:
   redis_data:
