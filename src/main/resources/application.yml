@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://123.206.104.63:3306/citicup?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8
-    username: citicup_user
-    password: citicup123456
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://123.206.104.63:3306/citicup?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8}
+    username: ${SPRING_DATASOURCE_USERNAME:citicup_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:citicup123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -19,8 +19,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
       repositories:
         enabled: false
 
@@ -29,27 +29,26 @@ spring:
 
 app:
   model-service:
-    base-url: http://localhost:8000  # model-remote FastAPI (predict + sentiment)
+    base-url: ${APP_MODEL_SERVICE_BASE_URL:http://localhost:8000}
   agent-service:
-    base-url: http://localhost:8001  # stagex2 agent simulation service
+    base-url: ${APP_AGENT_SERVICE_BASE_URL:http://localhost:8001}
   cache:
     ttl-seconds: 120
 
-  # 外部 API 代理（如油价 API 需要代理才能访问，填写代理地址；不需要则留空）
   proxy:
-    host: ""      # 例：172.29.0.1，留空则直连
-    port: 7897
+    host: ${APP_PROXY_HOST:}
+    port: ${APP_PROXY_PORT:7897}
 
   oilprice:
     api:
       url: https://api.oilpriceapi.com/v1/prices/latest
-      token: YOUR_OIL_API_TOKEN
+      token: ${APP_OILPRICE_API_TOKEN:YOUR_OIL_API_TOKEN}
   llm:
-    api-key: YOUR_LLM_API_KEY
+    api-key: ${APP_LLM_API_KEY:YOUR_LLM_API_KEY}
     url: https://api.deepseek.com/chat/completions
 
 stage2:
-  base-url: http://localhost:8002
+  base-url: ${STAGE2_BASE_URL:http://localhost:8002}
 
 
   

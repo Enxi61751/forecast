@@ -44,3 +44,9 @@ agent-service/.venv*/
 
 ### Model service worktree ###
 .model-service/
+
+### Docker deployment ###
+.env
+model-artifacts/
+model-service/
+frontend-src/
