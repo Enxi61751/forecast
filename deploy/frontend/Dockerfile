@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npx vite build
+RUN VITE_API_BASE_URL="" VITE_API_MODE="real" npx vite build
 
 # ---- Stage 2: Serve with Nginx ----
 FROM nginx:alpine
