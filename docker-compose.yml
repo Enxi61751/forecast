@@ -63,6 +63,8 @@ services:
       APP_PROXY_HOST: ${APP_PROXY_HOST:-}
       APP_PROXY_PORT: ${APP_PROXY_PORT:-7890}
       STAGE2_BASE_URL: http://agent-service:8001
+    volumes:
+      - ./explainability:/app/explainability:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
