@@ -38,6 +38,14 @@ function toText(value: unknown, fallback: string): string {
 }
 
 function normalizeSeries(raw: unknown): PredictionPoint[] {
+  // Handle backend format: { point: [{t, v}], lower: [...], upper: [...] }
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    if (Array.isArray(obj.point)) {
+      return normalizeSeries(obj.point);
+    }
+  }
+
   if (!Array.isArray(raw)) {
     return [];
   }
@@ -51,8 +59,8 @@ function normalizeSeries(raw: unknown): PredictionPoint[] {
       if (typeof item === "object" && item !== null) {
         const row = item as Record<string, unknown>;
         return {
-          time: toText(row.time ?? row.date ?? row.label, `D+${index + 1}`),
-          value: toFiniteNumber(row.value ?? row.price ?? row.prediction)
+          time: toText(row.t ?? row.time ?? row.date ?? row.label, `D+${index + 1}`),
+          value: toFiniteNumber(row.v ?? row.value ?? row.price ?? row.prediction)
         };
       }
 
@@ -88,7 +96,18 @@ function withFallbackBand(forecast: PredictionPoint[], band: unknown, ratio: num
 }
 
 export function adaptPredictionResult(raw: PredictRunRawResponse, req: PredictionRunRequest): PredictionResult {
-  const forecast = normalizeSeries(raw.forecast ?? ((raw as Record<string, unknown>).result ?? null));
+  const rawForecast = raw.forecast ?? ((raw as Record<string, unknown>).result ?? null);
+
+  // Extract lower/upper from forecast object if present (backend format: {point, lower, upper})
+  let rawLower: unknown = raw.lowerBound;
+  let rawUpper: unknown = raw.upperBound;
+  if (typeof rawForecast === "object" && rawForecast !== null && !Array.isArray(rawForecast)) {
+    const forecastObj = rawForecast as Record<string, unknown>;
+    if (!rawLower && forecastObj.lower) rawLower = forecastObj.lower;
+    if (!rawUpper && forecastObj.upper) rawUpper = forecastObj.upper;
+  }
+
+  const forecast = normalizeSeries(rawForecast);
   const fallbackForecast = forecast.length
     ? forecast
     : [{ time: "D+1", value: 0 }];
@@ -102,8 +121,8 @@ export function adaptPredictionResult(raw: PredictRunRawResponse, req: Predictio
     target: toText(raw.target, req.target),
     horizon: toText(raw.horizon, req.horizon),
     forecast: fallbackForecast,
-    lowerBound: withFallbackBand(fallbackForecast, raw.lowerBound, 0.992),
-    upperBound: withFallbackBand(fallbackForecast, raw.upperBound, 1.008),
+    lowerBound: withFallbackBand(fallbackForecast, rawLower, 0.992),
+    upperBound: withFallbackBand(fallbackForecast, rawUpper, 1.008),
     nextDayPoint,
     summary,
     reportPreview: explainText ?? null,
