@@ -85,6 +85,8 @@ services:
       APP_PROXY_HOST: ${APP_PROXY_HOST:-}
       APP_PROXY_PORT: ${APP_PROXY_PORT:-7890}
       STAGE2_BASE_URL: http://agent-service:8001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy
