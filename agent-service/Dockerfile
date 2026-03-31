@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src
 
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /app/requirements.txt
 
 COPY src /app/src
 COPY clearing_calibration_sample.json /app/clearing_calibration_sample.json
