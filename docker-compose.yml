@@ -26,10 +26,10 @@ services:
         limits:
           memory: 400m
 
-  # ── Agent Service (port 8001) ──────────────────────────
+  # ── Agent Service (agent branch, port 8001) ──────────────────────────
   agent-service:
     build:
-      context: ./agent-service
+      context: ./agent-src/agent-service
     restart: always
     environment:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
