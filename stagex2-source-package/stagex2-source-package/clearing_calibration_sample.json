@@ -1,0 +1,44 @@
+[
+  {
+    "effective_net_flow": 180.0,
+    "liquidity_stress": 0.42,
+    "current_bid_ask_spread": 0.11,
+    "urgency_pressure": 0.58,
+    "current_price": 74.8,
+    "price_change": 0.09,
+    "total_volume": 320.0,
+    "next_liquidity_stress": 0.37,
+    "current_volatility": 0.021,
+    "next_volatility": 0.022,
+    "next_gamma_profile": "Neutral",
+    "updated_bid_ask_spread": 0.118
+  },
+  {
+    "effective_net_flow": -260.0,
+    "liquidity_stress": 0.67,
+    "current_bid_ask_spread": 0.18,
+    "urgency_pressure": 0.73,
+    "current_price": 76.4,
+    "price_change": -0.23,
+    "total_volume": 410.0,
+    "next_liquidity_stress": 0.61,
+    "current_volatility": 0.025,
+    "next_volatility": 0.031,
+    "next_gamma_profile": "Short Gamma",
+    "updated_bid_ask_spread": 0.212
+  },
+  {
+    "effective_net_flow": 95.0,
+    "liquidity_stress": 0.31,
+    "current_bid_ask_spread": 0.09,
+    "urgency_pressure": 0.41,
+    "current_price": 73.9,
+    "price_change": 0.04,
+    "total_volume": 210.0,
+    "next_liquidity_stress": 0.28,
+    "current_volatility": 0.019,
+    "next_volatility": 0.0195,
+    "next_gamma_profile": "Long Gamma",
+    "updated_bid_ask_spread": 0.094
+  }
+]

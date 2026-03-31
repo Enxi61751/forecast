@@ -1,0 +1,55 @@
+{
+  "input": {
+    "environment": {
+      "factor_snapshot": {
+        "current_price": 78.2,
+        "trend_score": 1.8,
+        "rsi_status": "Overbought",
+        "term_structure": "Backwardation",
+        "current_calendar_spread": 2.4,
+        "historical_spread_mean": 0.9,
+        "historical_spread_std": 0.5
+      },
+      "tail_risk_report": {
+        "gamma_profile": "Short Gamma",
+        "liquidity_stress": 0.82
+      },
+      "market_microstructure": {
+        "bid_ask_spread": 0.18,
+        "order_book_depth": "Thin",
+        "spread_bid_ask_spread": 0.09,
+        "spread_order_book_depth": "Normal",
+        "options_bid_ask_spread": 0.31,
+        "options_order_book_depth": "Thin"
+      },
+      "session_info": {
+        "phase": "Close",
+        "time_to_close": 10
+      }
+    },
+    "event": {
+      "headline": "Port strike extends and crude inventory falls sharply",
+      "body": "Logistics disruption and inventory shortage raise near-term supply concerns.",
+      "source": "Central Bank Statement",
+      "impact_type": "Supply Shock"
+    },
+    "self": {
+      "role": "CTA",
+      "mandate": "Alpha seeking",
+      "hedger_type": "consumer",
+      "max_leverage": 3.0,
+      "stop_loss_pct": 0.05,
+      "position": 0,
+      "unrealized_pnl": 0,
+      "unrealized_pnl_pct": 0.0,
+      "cash_level": 100000,
+      "last_action": "Hold",
+      "consecutive_losses": 0,
+      "view_history": "Neutral."
+    }
+  },
+  "current_price": 78.2,
+  "current_volatility": 0.02,
+  "dealer_inventory": 0,
+  "calibration_file": "/app/clearing_calibration_sample.json"
+}
