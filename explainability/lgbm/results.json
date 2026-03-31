@@ -1,0 +1,72 @@
+{
+  "overview": {
+    "model_name": "Model-LGBM_GS-u100-l700-p1-dataset_wti_return_new",
+    "model_type": "LightGBM",
+    "train_lag": 700,
+    "update_period": 100
+  },
+  "records": [
+    {
+      "train_date": "20240101",
+      "sample_count": null,
+      "best_cv_score": null,
+      "best_params": {},
+      "summary_plot": "20240101/shap_summary_20240101.png",
+      "bar_plot": "20240101/shap_bar_20240101.png",
+      "top_features": [
+        {
+          "name": "sentiment_mean",
+          "importance": 0.002842
+        },
+        {
+          "name": "sentiment_sum",
+          "importance": 0.000844
+        },
+        {
+          "name": "wti_momentum_10d",
+          "importance": 0.000753
+        },
+        {
+          "name": "Original_Price",
+          "importance": 0.00037
+        },
+        {
+          "name": "diesel_wti_spread",
+          "importance": 0.000257
+        }
+      ],
+      "conclusion": "在 20240101 这期 LightGBM 解释结果中，情绪均值与情绪总量是最主要的驱动因素，其次是 10 日动量、原油原始价格和柴油-原油价差，说明模型在这一阶段对情绪信号和价格惯性特征高度敏感。"
+    },
+    {
+      "train_date": "20240524",
+      "sample_count": null,
+      "best_cv_score": null,
+      "best_params": {},
+      "summary_plot": "20240524/shap_summary_20240524.png",
+      "bar_plot": "20240524/shap_bar_20240524.png",
+      "top_features": [
+        {
+          "name": "sentiment_mean",
+          "importance": 0.002263
+        },
+        {
+          "name": "sentiment_sum",
+          "importance": 0.00127
+        },
+        {
+          "name": "Original_Price",
+          "importance": 0.00066
+        },
+        {
+          "name": "wti_momentum_10d",
+          "importance": 0.000593
+        },
+        {
+          "name": "diesel_wti_spread",
+          "importance": 0.000395
+        }
+      ],
+      "conclusion": "在 20240524 这期 LightGBM 解释结果中，sentiment_mean 与 sentiment_sum 仍然占据最高重要性，其次是原油原始价格、10 日动量和柴油-原油价差，说明模型持续依赖情绪变量与价格惯性来刻画收益率变化。"
+    }
+  ]
+}

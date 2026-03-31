@@ -1,0 +1,72 @@
+{
+  "overview": {
+    "model_name": "Model-DE_GS-u100-l700-p1-dataset_wti_return_new",
+    "model_type": "DoubleEnsemble",
+    "train_lag": 700,
+    "update_period": 100
+  },
+  "records": [
+    {
+      "train_date": "20241011",
+      "sample_count": null,
+      "best_cv_score": null,
+      "best_params": {},
+      "summary_plot": "20241011/shap_summary_20241011.png",
+      "bar_plot": "20241011/shap_bar_20241011.png",
+      "top_features": [
+        {
+          "name": "sentiment_mean",
+          "importance": 0.001876
+        },
+        {
+          "name": "sentiment_sum",
+          "importance": 0.001705
+        },
+        {
+          "name": "Original_Price",
+          "importance": 0.000837
+        },
+        {
+          "name": "wti_momentum_10d",
+          "importance": 0.00037
+        },
+        {
+          "name": "diesel_wti_spread",
+          "importance": 0.000343
+        }
+      ],
+      "conclusion": "在 20241011 这期 DoubleEnsemble 解释结果中，情绪聚合特征（sentiment_mean、sentiment_sum）贡献最高，其次是原油原始价格、10 日动量和柴油-原油价差，说明模型在该阶段对情绪与价格惯性信号更敏感。"
+    },
+    {
+      "train_date": "20250328",
+      "sample_count": null,
+      "best_cv_score": null,
+      "best_params": {},
+      "summary_plot": "20250328/shap_summary_20250328.png",
+      "bar_plot": "20250328/shap_bar_20250328.png",
+      "top_features": [
+        {
+          "name": "sentiment_sum",
+          "importance": 0.001886
+        },
+        {
+          "name": "sentiment_mean",
+          "importance": 0.001274
+        },
+        {
+          "name": "Original_Price",
+          "importance": 0.000617
+        },
+        {
+          "name": "wti_momentum_10d",
+          "importance": 0.000541
+        },
+        {
+          "name": "Original_Price_lag1",
+          "importance": 0.000296
+        }
+      ],
+      "conclusion": "在 20250328 这期 DoubleEnsemble 解释结果中，sentiment_sum 与 sentiment_mean 仍然是最主要的驱动因素，其次是原油原始价格、10 日动量和前一日价格，说明模型在这一阶段继续显著依赖情绪信号与价格惯性。"
+    }
+  ]
+}

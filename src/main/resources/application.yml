@@ -47,8 +47,9 @@ app:
     api-key: ${APP_LLM_API_KEY:YOUR_LLM_API_KEY}
     url: https://api.deepseek.com/chat/completions
 
+  explainability:
+    base-dir: ${APP_EXPLAINABILITY_BASE_DIR:./explainability}
+    asset-url-prefix: ${APP_EXPLAINABILITY_ASSET_URL_PREFIX:/explainability-assets}
+
 stage2:
   base-url: ${STAGE2_BASE_URL:http://localhost:8002}
-
-
-  
