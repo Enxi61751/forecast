@@ -47,6 +47,6 @@ agent-service/.venv*/
 
 ### Docker deployment ###
 .env
-model-artifacts/
-model-service/
-frontend-src/
+/model-artifacts/
+/model-service/
+/frontend-src/
