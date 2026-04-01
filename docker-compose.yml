@@ -80,7 +80,7 @@ services:
   frontend:
     build:
       context: ./frontend-src/frontend
-      dockerfile: Dockerfile
+      dockerfile: ../../deploy/frontend/Dockerfile
       args:
         SERVER_URL: ${SERVER_URL:-http://localhost}
     restart: always
