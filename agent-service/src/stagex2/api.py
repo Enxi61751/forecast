@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Optional
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -16,6 +16,56 @@ from .schemas import (
     SimulationInput,
 )
 from .simulator import run_multi_step, run_single_step
+
+
+def _default_simulation_input() -> dict:
+    return {
+        "input": {
+            "environment": {
+                "factor_snapshot": {
+                    "trend_score": 0.0,
+                    "rsi_status": "Neutral",
+                    "term_structure": "Contango",
+                },
+                "tail_risk_report": {
+                    "gamma_profile": "Neutral",
+                    "liquidity_stress": 0.3,
+                },
+                "market_microstructure": {
+                    "bid_ask_spread": 0.05,
+                    "order_book_depth": "Normal",
+                },
+                "session_info": {
+                    "phase": "Mid-Day",
+                    "time_to_close": 240,
+                },
+            },
+            "event": {
+                "headline": "Oil price forecast demo",
+                "body": "Default simulation run",
+                "source": "CitiCup Model",
+                "impact_type": "price",
+                "sentiment_score": 0.0,
+            },
+            "self": {
+                "role": "CTA",
+                "mandate": "trend-following momentum strategy",
+                "hedger_type": "neutral",
+                "max_leverage": 3.0,
+                "stop_loss_pct": 0.05,
+                "position": 0.0,
+                "unrealized_pnl": 0.0,
+                "unrealized_pnl_pct": 0.0,
+                "cash_level": 1000000.0,
+                "last_action": "NONE",
+                "consecutive_losses": 0,
+                "view_history": "neutral",
+            },
+        },
+        "current_price": 80.0,
+        "current_volatility": 0.2,
+        "dealer_inventory": 100,
+    }
 
 
 class SingleStepRequest(BaseModel):
@@ -56,10 +106,7 @@ app = FastAPI(title="Stage X2 Agent Service", version="1.0.0")
 # 关键：加 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -91,7 +138,9 @@ def agent_daily_feed() -> dict:
 
 
 @app.post("/simulate/single")
-def simulate_single(request: SingleStepRequest) -> dict:
+def simulate_single(request: Optional[SingleStepRequest] = Body(None)) -> dict:
+    if request is None:
+        request = SingleStepRequest(**_default_simulation_input())
     result = run_single_step(
         request.simulation_input,
         current_price=request.current_price,

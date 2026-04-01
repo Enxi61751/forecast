@@ -10,6 +10,8 @@ COPY agent-src/stagex2-source-package/stagex2-source-package/requirements.txt /a
 RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /app/requirements.txt
 
 COPY agent-src/stagex2-source-package/stagex2-source-package/src /app/src
+# Overlay yyy-dev api.py (has /agent/daily-feed + /simulate/default + CORS)
+COPY agent-service/src/stagex2/api.py /app/src/stagex2/api.py
 COPY agent-src/stagex2-source-package/stagex2-source-package/models.py /app/models.py
 COPY agent-src/stagex2-source-package/stagex2-source-package/agent_output.py /app/agent_output.py
 COPY agent-src/stagex2-source-package/stagex2-source-package/spacex2.1input-main.py /app/spacex2.1input-main.py
