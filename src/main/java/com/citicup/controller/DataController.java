@@ -1,7 +1,6 @@
 package com.citicup.controller;
 
 import com.citicup.entity.Event;
-import com.citicup.entity.Exchange;
 import com.citicup.service.EventService;
 import com.citicup.service.ExchangeService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,17 +39,13 @@ public class DataController {
 
     @GetMapping("/api/data/exchange")
     public Map<String, Object> exchange() {
-        List<Exchange> exchangeList = exchangeService.getExchangeList();
+        Map<String, Object> data = exchangeService.getExchangeList();
 
         Map<String, Object> result = new HashMap<>();
         result.put("code", 0);
         result.put("message", "success");
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("total", exchangeList.size());
-        data.put("list", exchangeList);
-
         result.put("data", data);
+
         return result;
     }
 }
