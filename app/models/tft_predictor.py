@@ -1,68 +1,29 @@
-# app/models/tft_predictor.py
-<<<<<<< HEAD
-import numpy as np
-from app.config import settings
-
-=======
 from __future__ import annotations
 
 from typing import Any
 
 import numpy as np
+
 from app.config import settings
 
 
->>>>>>> c3c3a7b (save local files)
 class TFTPredictor:
     def __init__(self):
         self._available = False
         self.model = None
-<<<<<<< HEAD
-=======
         self.torch = None
 
         self.quantiles: list[float] | None = None
         self.feature_cols: list[str] = []
         self.known_future_cols: list[str] = []
->>>>>>> c3c3a7b (save local files)
 
         if settings.USE_STUB:
             return
 
         try:
             import torch
+
             self.torch = torch
-<<<<<<< HEAD
-            self.model = torch.load(settings.TFT_CKPT_PATH, map_location=settings.DEVICE)
-            self.model.eval()
-            self._available = True
-        except Exception:
-            self._available = False
-
-    def predict(self, x_seq: np.ndarray) -> dict:
-        if settings.USE_STUB or (not self._available):
-            # stub：给一个中等风险概率 + 简单预测
-            return {"y_hat": np.array([x_seq[0, -1, 0]]), "extreme_prob": np.array([0.5])}
-
-        torch = self.torch
-        with torch.no_grad():
-            x = torch.tensor(x_seq, dtype=torch.float32, device=settings.DEVICE)
-            out = self.model(x)
-
-        # 你们模型输出结构可能不同，这里留适配层
-        # 约定 out 是 dict 或 tuple：
-        if isinstance(out, dict):
-            y_hat = out.get("y_hat")
-            extreme_prob = out.get("extreme_prob")
-        else:
-            y_hat, extreme_prob = out
-
-        return {
-            "y_hat": y_hat.detach().cpu().numpy(),
-            "extreme_prob": extreme_prob.detach().cpu().numpy()
-        }
-=======
-
             ckpt = torch.load(settings.TFT_CKPT_PATH, map_location=settings.DEVICE)
 
             # 情况1：checkpoint 本身就是一个完整模型对象
@@ -152,14 +113,13 @@ class TFTPredictor:
 
     def _try_rebuild_model_from_ckpt(self, ckpt: dict[str, Any]):
         """
-        尝试按照你新增源码的思路，从 checkpoint 重建 MultiTaskTFT。
-        若当前工程里没有对应类，则自动失败并返回 None，不会让服务崩掉。
+        尝试从 checkpoint 重建 MultiTaskTFT。
+        若当前工程里没有对应类，则返回 None。
         """
         try:
             from app.models.train_tft_multitask import MultiTaskTFT  # type: ignore
         except Exception:
             try:
-                # 有些同学会把训练代码不放在 app.models 下，这里再试一次
                 from train_tft_multitask import MultiTaskTFT  # type: ignore
             except Exception:
                 return None
@@ -211,9 +171,9 @@ class TFTPredictor:
             last_val = 0.0
 
         return {
-            "y_hat": np.array([last_val], dtype=np.float32),
-            "extreme_prob": np.array([0.5], dtype=np.float32),
-            "quantiles": self.quantiles,
+            "y_hat": float(last_val),
+            "extreme_prob": 0.5,
+            "quantiles": [float(q) for q in self.quantiles] if self.quantiles else None,
             "feature_importance": None,
             "hist_feature_importance": None,
             "known_future_feature_importance": None,
@@ -238,11 +198,13 @@ class TFTPredictor:
             for name, w in zip(hist_names, hist_avg):
                 val = self._safe_float(w, default=np.nan)
                 if np.isfinite(val):
-                    hist_rows.append({
-                        "feature": str(name),
-                        "group": "hist",
-                        "avg_weight": float(val),
-                    })
+                    hist_rows.append(
+                        {
+                            "feature": str(name),
+                            "group": "hist",
+                            "avg_weight": float(val),
+                        }
+                    )
 
         # 已知未来特征权重: 期望 [B, H, K]
         if w_known_np.size > 0 and w_known_np.ndim == 3:
@@ -255,17 +217,53 @@ class TFTPredictor:
             for name, w in zip(known_names, known_avg):
                 val = self._safe_float(w, default=np.nan)
                 if np.isfinite(val):
-                    known_rows.append({
-                        "feature": str(name),
-                        "group": "known_future",
-                        "avg_weight": float(val),
-                    })
+                    known_rows.append(
+                        {
+                            "feature": str(name),
+                            "group": "known_future",
+                            "avg_weight": float(val),
+                        }
+                    )
 
         hist_rows.sort(key=lambda x: x["avg_weight"], reverse=True)
         known_rows.sort(key=lambda x: x["avg_weight"], reverse=True)
 
         all_rows = (hist_rows + known_rows) or None
         return all_rows, (hist_rows or None), (known_rows or None)
+
+    def _call_model(self, x_seq: np.ndarray):
+        """
+        尽量兼容多种 forward 签名：
+        1) model(x)
+        2) model(x_hist, x_known, season_id)
+        """
+        torch = self.torch
+        if torch is None:
+            return None
+
+        x = torch.tensor(x_seq, dtype=torch.float32, device=settings.DEVICE)
+
+        # 方案1：单输入接口
+        try:
+            return self.model(x)
+        except TypeError:
+            pass
+        except Exception:
+            pass
+
+        # 方案2：多输入接口（参考离线评估脚本）
+        try:
+            batch_size = x.shape[0]
+            lookback = x.shape[1] if x.ndim >= 2 else 1
+
+            # 当前在线服务没有 known future / season_id 真值，只做最小兼容占位
+            x_hist = x
+            x_known = torch.zeros((batch_size, 1, max(len(self.known_future_cols), 1)), dtype=torch.float32, device=settings.DEVICE)
+            season_id = torch.zeros((batch_size,), dtype=torch.long, device=settings.DEVICE)
+
+            return self.model(x_hist, x_known, season_id)
+        except Exception:
+            return None
 
     def predict(self, x_seq: np.ndarray) -> dict[str, Any]:
         if settings.USE_STUB or (not self._available) or self.model is None:
@@ -277,10 +275,10 @@ class TFTPredictor:
 
         try:
             with torch.no_grad():
-                x = torch.tensor(x_seq, dtype=torch.float32, device=settings.DEVICE)
+                out = self._call_model(x_seq)
 
-                # 先按你当前旧版接口尝试：model(x)
-                out = self.model(x)
+            if out is None:
+                return self._stub_predict(x_seq)
 
             y_hat = None
             extreme_prob = None
@@ -290,74 +288,83 @@ class TFTPredictor:
             # 1) dict 输出
             if isinstance(out, dict):
                 y_hat = out.get("y_hat") or out.get("reg") or out.get("prediction")
-                extreme_prob = out.get("extreme_prob") or out.get("prob") or out.get("cls_prob")
+                extreme_prob = (
+                    out.get("extreme_prob")
+                    or out.get("prob")
+                    or out.get("cls_prob")
+                    or out.get("cls")
+                )
                 w_hist = out.get("w_hist") or out.get("hist_weights")
                 w_known = out.get("w_known") or out.get("known_weights")
 
-            # 2) tuple/list 输出
+            # 2) tuple/list 输出：兼容 (reg, cls_logit, w_hist, w_known)
             elif isinstance(out, (tuple, list)):
-                # 兼容:
-                # (y_hat, extreme_prob)
-                # (reg, cls_logit, w_hist, w_known)
-                if len(out) >= 2:
+                if len(out) >= 1:
                     y_hat = out[0]
+                if len(out) >= 2:
                     extreme_prob = out[1]
-                if len(out) >= 4:
+                if len(out) >= 3:
                     w_hist = out[2]
+                if len(out) >= 4:
                     w_known = out[3]
 
+            # 3) 其他情况：直接当 y_hat
             else:
-                # 3) 其他情况，直接当成 y_hat
                 y_hat = out
 
             if y_hat is None:
                 return self._stub_predict(x_seq)
 
+            # ---------- 1. 处理 y_hat ----------
             y_hat_np = self._safe_numpy(y_hat)
+            if y_hat_np.size == 0:
+                return self._stub_predict(x_seq)
 
-            # 统一成至少一维
             if y_hat_np.ndim == 0:
                 y_hat_np = y_hat_np.reshape(1)
 
-            # 如果 y_hat 是 [B, Q] 或 [Q]，取中位数分位
+            # [Q] or [1,Q] -> 取最接近 0.5 的分位
             if y_hat_np.ndim == 1:
                 median_idx = self._find_median_index(self.quantiles, y_hat_np)
                 y_pred_value = y_hat_np[median_idx] if y_hat_np.shape[0] > median_idx else y_hat_np[0]
             else:
                 median_idx = self._find_median_index(self.quantiles, y_hat_np)
-                y_pred_value = y_hat_np[0, median_idx] if y_hat_np.shape[-1] > median_idx else y_hat_np[0, 0]
+                y_pred_value = y_hat_np[0, median_idx] if y_hat_np.shape[-1] > median_idx else y_hat_np.reshape(-1)[0]
 
-            # 分类概率处理
+            # ---------- 2. 处理 extreme_prob ----------
             extreme_prob_np = self._safe_numpy(extreme_prob)
             if extreme_prob_np.size == 0:
-                extreme_prob_value = np.array([0.5], dtype=np.float32)
+                extreme_prob_scalar = 0.5
             else:
-                # 如果是 logit，尝试做 sigmoid
                 try:
                     arr = extreme_prob_np.astype(np.float32)
+
+                    # 若拿到的是 cls_logit，则转 sigmoid
                     if np.any(arr < 0.0) or np.any(arr > 1.0):
                         arr = 1.0 / (1.0 + np.exp(-arr))
-                    extreme_prob_value = np.array([float(arr.reshape(-1)[0])], dtype=np.float32)
-                except Exception:
-                    extreme_prob_value = np.array([0.5], dtype=np.float32)
 
+                    extreme_prob_scalar = float(arr.reshape(-1)[0])
+                except Exception:
+                    extreme_prob_scalar = 0.5
+
+            # ---------- 3. 处理特征重要性 ----------
             feature_importance, hist_feature_importance, known_future_feature_importance = (
                 self._build_feature_importance_from_weights(w_hist, w_known)
             )
 
+            # ---------- 4. 返回 JSON-safe 结构 ----------
             return {
-                "y_hat": np.array([self._safe_float(y_pred_value, default=0.0)], dtype=np.float32),
-                "extreme_prob": extreme_prob_value,
-                "quantiles": self.quantiles,
+                "y_hat": float(self._safe_float(y_pred_value, default=0.0)),
+                "extreme_prob": float(extreme_prob_scalar),
+                "quantiles": [float(q) for q in self.quantiles] if self.quantiles else None,
                 "feature_importance": feature_importance,
                 "hist_feature_importance": hist_feature_importance,
                 "known_future_feature_importance": known_future_feature_importance,
                 "raw": {
-                    "has_w_hist": w_hist is not None,
-                    "has_w_known": w_known is not None,
                     "source": "real_tft",
+                    "has_w_hist": bool(w_hist is not None),
+                    "has_w_known": bool(w_known is not None),
                 },
             }
         except Exception:
             return self._stub_predict(x_seq)
->>>>>>> c3c3a7b (save local files)

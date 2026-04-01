@@ -17,9 +17,8 @@ from app.schemas import (
     TimePoint,
 )
 
-<<<<<<< HEAD
-app = FastAPI(title="CitiCup Model Service", version="0.1.0")
-=======
+
+
 
 import os
 from datetime import datetime, timezone, timedelta
@@ -53,7 +52,7 @@ def _to_jsonable(obj):
         return bool(obj)
 
     return obj
->>>>>>> c3c3a7b (save local files)
+
 pipe = PredictPipeline()
 
 
@@ -77,11 +76,8 @@ class ExtremeEventDto(BaseModel):
 class SentimentResponseDto(BaseModel):
     sentiment: float
     confidence: float
-<<<<<<< HEAD
-    extremeEvents: List[ExtremeEventDto] = []
-=======
+
     extremeEvents: List[ExtremeEventDto] = Field(default_factory=list)
->>>>>>> c3c3a7b (save local files)
 
 
 def _keyword_sentiment(text: str) -> float:
@@ -225,12 +221,7 @@ def predict(req: PredictRequest):
             lower_series.append(TimePoint(t=t_k, v=float(lo)))
             upper_series.append(TimePoint(t=t_k, v=float(hi)))
 
-<<<<<<< HEAD
-=======
-        raw = _to_jsonable(raw)
-        explain = _to_jsonable(explain)
 
->>>>>>> c3c3a7b (save local files)
         forecast = Forecast(
             point=point_series,
             lower=lower_series,

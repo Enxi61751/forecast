@@ -19,11 +19,7 @@ class Event(BaseModel):
 
 
 class CEEMDANConfig(BaseModel):
-<<<<<<< HEAD
     enabled: bool = False  # default off; only on if client explicitly enables
-=======
-    enabled: bool = False
->>>>>>> c3c3a7b (save local files)
     trials: int = 100
     noise_width: float = 0.2
     max_imfs: int = 8
@@ -40,10 +36,7 @@ class PredictRequest(BaseModel):
     target: str
     horizon: str
     asOf: Optional[datetime] = None
-<<<<<<< HEAD
     # series is optional: if not provided, pipeline falls back to pre-computed model predictions
-=======
->>>>>>> c3c3a7b (save local files)
     series: Optional[SeriesPayload] = None
     events: list[Event] = Field(default_factory=list)
     ceemdan: CEEMDANConfig = Field(default_factory=CEEMDANConfig)
@@ -61,10 +54,6 @@ class ExtremeClass(BaseModel):
     prob: float
 
 
-<<<<<<< HEAD
-class Explain(BaseModel):
-    # Suppress Pydantic v2 warning about "model_" protected namespace
-=======
 class FeatureImportanceItem(BaseModel):
     feature: str
     group: str
@@ -88,7 +77,7 @@ class TFTExplain(BaseModel):
 
 
 class Explain(BaseModel):
->>>>>>> c3c3a7b (save local files)
+    # Suppress Pydantic v2 warning about "model_" protected namespace
     model_config = ConfigDict(protected_namespaces=())
 
     notes: Optional[str] = None
@@ -97,17 +86,10 @@ class Explain(BaseModel):
     alpha: Optional[float] = None
     ceemdan: Optional[dict[str, Any]] = None
     model_outputs: Optional[dict[str, Any]] = None
-<<<<<<< HEAD
-=======
     tft: Optional[TFTExplain] = None
->>>>>>> c3c3a7b (save local files)
 
 
 class PredictResponse(BaseModel):
     forecast: Forecast
     extremeClass: ExtremeClass
-<<<<<<< HEAD
     explain: Explain
-=======
-    explain: Explain
->>>>>>> c3c3a7b (save local files)
