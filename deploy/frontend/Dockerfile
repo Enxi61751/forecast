@@ -5,7 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ARG SERVER_URL=http://localhost
-RUN VITE_API_BASE_URL=${SERVER_URL} VITE_API_MODE="real" npx vite build
+RUN VITE_API_BASE_URL=${SERVER_URL} VITE_AGENT_BASE_URL="" VITE_API_MODE="real" npx vite build
 
 # ---- Stage 2: Serve with Nginx ----
 FROM nginx:alpine

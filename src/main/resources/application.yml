@@ -40,10 +40,9 @@ app:
     port: ${APP_PROXY_PORT:7897}
 
   oilprice:
-    oilprice:
     api:
       url: https://api.oilpriceapi.com/v1/prices/latest
-      token: 66fac2d9125a31ffc264fb375f28388e967639c0d8873a4a81b7dfab60aa9369
+      token: ${APP_OILPRICE_API_TOKEN:YOUR_OIL_API_TOKEN}
       
   llm:
     api-key: ${APP_LLM_API_KEY:YOUR_LLM_API_KEY}
