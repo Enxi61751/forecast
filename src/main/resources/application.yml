@@ -51,5 +51,11 @@ app:
     base-dir: ${APP_EXPLAINABILITY_BASE_DIR:./explainability}
     asset-url-prefix: ${APP_EXPLAINABILITY_ASSET_URL_PREFIX:/explainability-assets}
 
+springdoc:
+  api-docs:
+    path: /api/v3/api-docs
+  swagger-ui:
+    path: /api/swagger-ui/index.html
+
 stage2:
   base-url: ${STAGE2_BASE_URL:http://localhost:8002}
