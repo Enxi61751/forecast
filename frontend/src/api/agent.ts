@@ -34,26 +34,46 @@ export async function getAgentFeed(): Promise<AgentApiResult> {
   }
 }
 
-export async function simulateMarket(): Promise<Record<string, unknown>> {
-  const response = await fetch("/api/agent/demo/simulate-single", {
-    method: "GET"
+export async function simulateMarket(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const response = await fetch(`${AGENT_BASE_URL}/simulate/single`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
+
+  const data = (await response.json()) as Record<string, unknown>;
 
   if (!response.ok) {
     throw new Error(`运行模拟失败: HTTP ${response.status}`);
   }
 
-  return (await response.json()) as Record<string, unknown>;
+  if (data.ok === false && typeof data.error === "string") {
+    throw new Error(`运行模拟失败: ${data.error}`);
+  }
+
+  return data;
 }
 
-export async function iterateWithParams(_params: Record<string, unknown>): Promise<Record<string, unknown>> {
-  const response = await fetch("/api/agent/demo/simulate-single", {
-    method: "GET"
+export async function iterateWithParams(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const response = await fetch(`${AGENT_BASE_URL}/simulate/single`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
+
+  const data = (await response.json()) as Record<string, unknown>;
 
   if (!response.ok) {
     throw new Error(`运行迭代失败: HTTP ${response.status}`);
   }
 
-  return (await response.json()) as Record<string, unknown>;
+  if (data.ok === false && typeof data.error === "string") {
+    throw new Error(`运行迭代失败: ${data.error}`);
+  }
+
+  return data;
 }

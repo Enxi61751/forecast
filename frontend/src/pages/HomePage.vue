@@ -5,7 +5,13 @@
     <AsyncState :status="status" empty-text="功能入口为空" show-retry @retry="init">
       <HeroBanner />
       <section class="entry-grid">
-        <FeatureEntryCard v-for="entry in entries" :key="entry.to" :to="entry.to" :title="entry.title" :description="entry.description" />
+        <FeatureEntryCard
+          v-for="entry in entries"
+          :key="entry.to"
+          :to="entry.to"
+          :title="entry.title"
+          :description="entry.description"
+        />
       </section>
     </AsyncState>
   </section>
@@ -18,14 +24,43 @@ import HeroBanner from "@/components/home/HeroBanner.vue";
 import FeatureEntryCard from "@/components/home/FeatureEntryCard.vue";
 import type { LoadStatus } from "@/types/common";
 
-const entries = [
-  { to: "/exchange", title: "市场行情" },
-  { to: "/forecast", title: "汇率查询"},
-  { to: "/oil-forecast", title: "原油预测"},
-  { to: "/agent-interaction", title: "智能体交互" },
-  { to: "/backtest", title: "策略回测"},
-  { to: "/news-events", title: "新闻事件" },
-  { to: "/explainability", title: "可解释性" }
+type HomeEntry = {
+  to: string;
+  title: string;
+  description: string;
+};
+
+const entries: HomeEntry[] = [
+  {
+    to: "/exchange",
+    title: "市场行情",
+    description: "查看汇率、油价等市场数据的最新展示结果"
+  },
+  {
+    to: "/oil-forecast",
+    title: "原油预测",
+    description: "查看原油价格预测结果与趋势变化"
+  },
+  {
+    to: "/agent-interaction",
+    title: "智能体交互",
+    description: "查看多智能体分析过程与交互结果"
+  },
+  {
+    to: "/backtest",
+    title: "策略回测",
+    description: "查看模型历史表现、收益变化与回测结果"
+  },
+  {
+    to: "/news-events",
+    title: "新闻事件",
+    description: "查看新闻、事件及其对市场的影响分析"
+  },
+  {
+    to: "/explainability",
+    title: "可解释性",
+    description: "查看模型解释结果、关键特征与分析摘要"
+  }
 ];
 
 const status = ref<LoadStatus>("loading");

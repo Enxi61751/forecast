@@ -1,8 +1,27 @@
 import { requestWithFallback } from "./http";
 
-export interface ExchangeItem {
+export interface ExchangeHistoryPoint {
   date: string;
-  rate: number;
+  value: number;
+}
+
+export interface ExchangeHistory {
+  "1W": ExchangeHistoryPoint[];
+  "1M": ExchangeHistoryPoint[];
+  "6M": ExchangeHistoryPoint[];
+}
+
+export interface ExchangeItem {
+  symbol: string;
+  name: string;
+  date: string;
+  open?: number;
+  high: number;
+  low: number;
+  close: number;
+  change: number;
+  changePercent?: number;
+  history: ExchangeHistory;
 }
 
 export interface ExchangeListResult {
@@ -10,15 +29,11 @@ export interface ExchangeListResult {
   total: number;
 }
 
-export function getExchangeList() {
+export function getExchangeRates() {
   return requestWithFallback<ExchangeListResult, ExchangeListResult>({
     path: "/api/data/exchange",
-    mocker: async () => ({
-      total: 2,
-      list: [
-        { date: "2026-03-18", rate: 7.21 },
-        { date: "2026-03-19", rate: 7.23 }
-      ]
-    })
+    mocker: async () => {
+      throw new Error("实时油价接口不可用，未启用本地 mock 数据");
+    }
   });
 }

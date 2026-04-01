@@ -2,10 +2,10 @@
   <section class="section-grid">
     <h1 class="page-title">市场行情</h1>
 
-
     <section class="card market-note">
       <div>
-        <h3>这里是市场浏览，不是预测入口</h3>
+        <h3>这里展示的是实时油价市场数据</h3>
+        <p>页面会自动轮询后端接口，获取最新油价与历史走势</p>
       </div>
       <RouterLink class="market-link" to="/oil-forecast">前往原油预测</RouterLink>
     </section>
@@ -37,12 +37,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import AsyncState from "@/components/common/AsyncState.vue";
 import ExchangeRateCard from "@/components/exchange/ExchangeRateCard.vue";
 import ExchangeDetailModal from "@/components/exchange/ExchangeDetailModal.vue";
 import { getExchangeRates } from "@/api";
+import type { ExchangeHistoryPoint, ExchangeItem } from "@/api/exchange";
 import type { LoadStatus } from "@/types/common";
 import type { ExchangeRateCardData, ExchangeTimeRange } from "@/types/exchange";
 
@@ -53,75 +54,71 @@ const selected = ref<ExchangeRateCardData | null>(null);
 const showModal = ref(false);
 const range = ref<ExchangeTimeRange>("1W");
 
+let refreshTimer: number | null = null;
+const REFRESH_INTERVAL_MS = 30000;
+
 function openDetail(data: ExchangeRateCardData): void {
   selected.value = data;
   range.value = "1W";
   showModal.value = true;
 }
 
-function buildTrend(baseRate: number): Record<ExchangeTimeRange, number[]> {
+function toTrend(points: ExchangeHistoryPoint[] | undefined): number[] {
+  if (!points?.length) {
+    return [];
+  }
+  return points.map((point) => Number(Number(point.value).toFixed(4)));
+}
+
+function toLabels(points: ExchangeHistoryPoint[] | undefined): string[] {
+  if (!points?.length) {
+    return [];
+  }
+  return points.map((point) => point.date);
+}
+
+function normalizeItem(item: ExchangeItem, index: number): ExchangeRateCardData {
   return {
-    "1W": [
-      Number((baseRate - 0.08).toFixed(2)),
-      Number((baseRate - 0.04).toFixed(2)),
-      Number((baseRate - 0.02).toFixed(2)),
-      Number(baseRate.toFixed(2)),
-      Number((baseRate + 0.01).toFixed(2)),
-      Number((baseRate + 0.03).toFixed(2)),
-      Number((baseRate + 0.02).toFixed(2))
-    ],
-    "1M": [
-      Number((baseRate - 0.15).toFixed(2)),
-      Number((baseRate - 0.1).toFixed(2)),
-      Number((baseRate - 0.05).toFixed(2)),
-      Number(baseRate.toFixed(2))
-    ],
-    "6M": [
-      Number((baseRate - 0.3).toFixed(2)),
-      Number((baseRate - 0.22).toFixed(2)),
-      Number((baseRate - 0.12).toFixed(2)),
-      Number((baseRate - 0.06).toFixed(2)),
-      Number(baseRate.toFixed(2)),
-      Number((baseRate + 0.08).toFixed(2))
-    ]
+    id: `${item.symbol}-${index}`,
+    pair: item.symbol,
+    name: item.name,
+    price: Number(Number(item.close).toFixed(4)),
+    change: Number(Number(item.change).toFixed(4)),
+    high: Number(Number(item.high).toFixed(4)),
+    low: Number(Number(item.low).toFixed(4)),
+    updatedAt: item.date,
+    trend: {
+      "1W": toTrend(item.history?.["1W"]),
+      "1M": toTrend(item.history?.["1M"]),
+      "6M": toTrend(item.history?.["6M"])
+    },
+    labels: {
+      "1W": toLabels(item.history?.["1W"]),
+      "1M": toLabels(item.history?.["1M"]),
+      "6M": toLabels(item.history?.["6M"])
+    }
   };
 }
 
-function buildLabels(date: string): Record<ExchangeTimeRange, string[]> {
-  return {
-    "1W": ["D1", "D2", "D3", "D4", "D5", "D6", "D7"],
-    "1M": ["W1", "W2", "W3", "W4"],
-    "6M": ["M1", "M2", "M3", "M4", "M5", date]
-  };
-}
+async function loadRates(silent = false): Promise<void> {
+  if (!silent) {
+    status.value = "loading";
+  }
 
-async function loadRates(): Promise<void> {
-  status.value = "loading";
   try {
     const res = await getExchangeRates();
+    rates.value = (res.list ?? []).map(normalizeItem);
 
-    rates.value = res.list.map((item, index) => {
-      const trend = buildTrend(item.rate);
-      const latestWeek = trend["1W"];
-      const first = latestWeek[0];
-      const last = latestWeek[latestWeek.length - 1];
-      const change = Number((last - first).toFixed(2));
+    if (!silent || status.value !== "success") {
+      status.value = rates.value.length ? "success" : "empty";
+    }
 
-      return {
-        id: `oil-${index}`,
-        pair: "WTI/USD",
-        name: "WTI 市场价格",
-        price: item.rate,
-        change,
-        high: Math.max(...latestWeek),
-        low: Math.min(...latestWeek),
-        updatedAt: item.date,
-        trend,
-        labels: buildLabels(item.date)
-      };
-    });
-
-    status.value = rates.value.length ? "success" : "empty";
+    if (showModal.value && selected.value) {
+      const latest = rates.value.find((item) => item.pair === selected.value?.pair);
+      if (latest) {
+        selected.value = latest;
+      }
+    }
   } catch (error) {
     console.error(error);
     errorMessage.value = error instanceof Error ? error.message : "获取市场数据失败";
@@ -129,8 +126,27 @@ async function loadRates(): Promise<void> {
   }
 }
 
+function startPolling(): void {
+  stopPolling();
+  refreshTimer = window.setInterval(() => {
+    void loadRates(true);
+  }, REFRESH_INTERVAL_MS);
+}
+
+function stopPolling(): void {
+  if (refreshTimer !== null) {
+    window.clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
 onMounted(() => {
   void loadRates();
+  startPolling();
+});
+
+onBeforeUnmount(() => {
+  stopPolling();
 });
 </script>
 
@@ -144,7 +160,7 @@ onMounted(() => {
 }
 
 .market-note p {
-  margin: 0 0 6px;
+  margin: 6px 0 0;
   color: var(--color-text-secondary);
   font-size: 13px;
 }
